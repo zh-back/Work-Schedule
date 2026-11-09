@@ -149,7 +149,9 @@ HRESULT STDMETHODCALLTYPE ControllerCompletedHandler::Invoke(HRESULT hr, ICoreWe
 
 HRESULT STDMETHODCALLTYPE EnvCompletedHandler::Invoke(HRESULT hr, ICoreWebView2Environment *env) {
     if (FAILED(hr) || !env) {
-        MessageBoxW(m_hwnd, L"初始化 WebView2 运行环境失败，请确认系统已安装 Microsoft Edge WebView2 Runtime。", L"环境错误", MB_OK | MB_ICONERROR);
+        wchar_t errBuf[512];
+        swprintf_s(errBuf, 512, L"初始化 WebView2 运行环境失败 (错误代码: 0x%08lX)。\n请确认系统已安装 Microsoft Edge WebView2 Runtime。", (unsigned long)hr);
+        MessageBoxW(m_hwnd, errBuf, L"环境错误", MB_OK | MB_ICONERROR);
         return hr;
     }
 
@@ -263,10 +265,22 @@ static void InitWebView(HWND hwnd, int port) {
         return;
     }
 
-    pfnCreateEnv(NULL, NULL, NULL, new EnvCompletedHandler(hwnd, port));
+    wchar_t userDir[MAX_PATH] = {0};
+    DWORD len = GetEnvironmentVariableW(L"LOCALAPPDATA", userDir, MAX_PATH);
+    if (len > 0) {
+        wcscat_s(userDir, MAX_PATH, L"\\ScheduleWorklog");
+        CreateDirectoryW(userDir, NULL);
+        wcscat_s(userDir, MAX_PATH, L"\\WebView2_Data");
+        CreateDirectoryW(userDir, NULL);
+    }
+
+    pfnCreateEnv(NULL, userDir[0] ? userDir : NULL, NULL, new EnvCompletedHandler(hwnd, port));
 }
 
 extern "C" int gui_window_create_and_run(int http_port) {
+    // Initialize OLE / STA COM apartment for WebView2
+    OleInitialize(NULL);
+
     g_port = http_port;
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
@@ -324,5 +338,6 @@ extern "C" int gui_window_create_and_run(int http_port) {
         DispatchMessageW(&msg);
     }
 
+    OleUninitialize();
     return 0;
 }
