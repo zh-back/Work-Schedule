@@ -125,15 +125,35 @@ public:
     }
 };
 
+static void UpdateWebViewBounds(HWND hwnd) {
+    if (!g_controller) return;
+    RECT client;
+    GetClientRect(hwnd, &client);
+
+    WINDOWPLACEMENT wp;
+    memset(&wp, 0, sizeof(wp));
+    wp.length = sizeof(wp);
+    GetWindowPlacement(hwnd, &wp);
+    bool isMaximized = (wp.showCmd == SW_SHOWMAXIMIZED);
+
+    RECT bounds = client;
+    if (!isMaximized) {
+        const int border = 5;
+        bounds.left += border;
+        bounds.top += border;
+        bounds.right -= border;
+        bounds.bottom -= border;
+    }
+    g_controller->put_Bounds(bounds);
+}
+
 HRESULT STDMETHODCALLTYPE ControllerCompletedHandler::Invoke(HRESULT hr, ICoreWebView2Controller *controller) {
     if (FAILED(hr) || !controller) return hr;
 
     g_controller = controller;
     g_controller->AddRef();
 
-    RECT bounds;
-    GetClientRect(m_hwnd, &bounds);
-    g_controller->put_Bounds(bounds);
+    UpdateWebViewBounds(m_hwnd);
 
     g_controller->get_CoreWebView2(&g_webview);
     if (g_webview) {
@@ -163,10 +183,29 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     switch (msg) {
         case WM_NCCALCSIZE: {
             if (wParam) {
-                // Remove standard window borders, filling the whole client area
+                WINDOWPLACEMENT wp;
+                memset(&wp, 0, sizeof(wp));
+                wp.length = sizeof(wp);
+                GetWindowPlacement(hwnd, &wp);
+                if (wp.showCmd == SW_SHOWMAXIMIZED) {
+                    HMONITOR hMon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+                    MONITORINFO mi;
+                    mi.cbSize = sizeof(mi);
+                    if (GetMonitorInfoW(hMon, &mi)) {
+                        LPNCCALCSIZE_PARAMS params = (LPNCCALCSIZE_PARAMS)lParam;
+                        params->rgrc[0] = mi.rcWork;
+                    }
+                }
                 return 0;
             }
             break;
+        }
+
+        case WM_GETMINMAXINFO: {
+            LPMINMAXINFO mmi = (LPMINMAXINFO)lParam;
+            mmi->ptMinTrackSize.x = 760;
+            mmi->ptMinTrackSize.y = 480;
+            return 0;
         }
 
         case WM_NCHITTEST: {
@@ -195,11 +234,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         }
 
         case WM_SIZE: {
-            if (g_controller) {
-                RECT bounds;
-                GetClientRect(hwnd, &bounds);
-                g_controller->put_Bounds(bounds);
-            }
+            UpdateWebViewBounds(hwnd);
             break;
         }
 
@@ -291,7 +326,7 @@ extern "C" int gui_window_create_and_run(int http_port) {
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    wc.hbrBackground = CreateSolidBrush(RGB(15, 23, 42));
     wc.lpszClassName = L"ScheduleWorklogWindow";
 
     RegisterClassExW(&wc);

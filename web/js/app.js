@@ -223,15 +223,20 @@ async function loadItems() {
       const privHtml = item.visibility === 'private' ? '<span class="badge-priv">🔒私密</span>' : '';
 
       card.innerHTML = `
-        <input type="checkbox" class="item-checkbox" data-id="${item.id}">
+        <input type="checkbox" class="item-checkbox" data-id="${item.id}" title="完成打卡">
         <div class="item-content">${escapeHtml(item.content)}</div>
         <div class="item-meta">
           ${tagHtml}
           ${privHtml}
         </div>
+        <button class="btn-icon-delete" title="删除待办" data-id="${item.id}">🗑️</button>
       `;
 
       card.querySelector('.item-checkbox').onchange = () => markItemDone(item.id);
+      card.querySelector('.btn-icon-delete').onclick = (e) => {
+        e.stopPropagation();
+        deleteItem(item.id, item.content);
+      };
       todoContainer.appendChild(card);
     });
   }
@@ -258,7 +263,12 @@ async function loadItems() {
           ${tagHtml}
           ${privHtml}
         </div>
+        <button class="btn-icon-delete" title="删除记录" data-id="${item.id}">🗑️</button>
       `;
+      card.querySelector('.btn-icon-delete').onclick = (e) => {
+        e.stopPropagation();
+        deleteItem(item.id, item.content);
+      };
       doneContainer.appendChild(card);
     });
   }
@@ -299,6 +309,25 @@ async function markItemDone(itemId) {
 
   if (res.ok) {
     await loadItems();
+  }
+}
+
+async function deleteItem(itemId, itemContent) {
+  const shortText = itemContent && itemContent.length > 25 ? itemContent.substring(0, 25) + '...' : (itemContent || '该事项');
+  if (!confirm(`确定要删除此项工作记录吗？\n\n"${shortText}"`)) {
+    return;
+  }
+
+  const res = await fetch('/api/items/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item_id: itemId })
+  });
+
+  if (res.ok) {
+    await loadItems();
+  } else {
+    alert('删除失败，请稍后重试');
   }
 }
 

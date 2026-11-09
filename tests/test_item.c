@@ -71,6 +71,18 @@ int test_schedule_item_flow(void) {
     ASSERT_TRUE(found_private);
     item_list_free(&dones);
 
+    // 8. Test deletion of an item
+    rc = item_delete(done_id);
+    ASSERT_EQ_INT(0, rc);
+
+    // 9. Verify today dones now has only 1 item remaining
+    memset(&dones, 0, sizeof(dones));
+    rc = item_list_today_dones(proj_id, current_user.id, &dones);
+    ASSERT_EQ_INT(0, rc);
+    ASSERT_EQ_INT(1, dones.count);
+    ASSERT_EQ_STR(todo_id, dones.items[0].id);
+    item_list_free(&dones);
+
     project_list_free(&plist);
     db_close();
     return 0;

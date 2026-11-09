@@ -291,12 +291,14 @@ body {
 
 .input-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .task-text-input {
-  flex: 1;
+  flex: 1 1 180px;
+  min-width: 0;
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -311,6 +313,7 @@ body {
 }
 
 .visibility-picker {
+  flex-shrink: 0;
   padding: 8px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -321,6 +324,7 @@ body {
 }
 
 .btn {
+  flex-shrink: 0;
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 13px;
@@ -399,7 +403,7 @@ body {
 /* 双栏面板 */
 .columns-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 14px;
   flex: 1;
   min-height: 0;
@@ -495,12 +499,41 @@ body {
   font-size: 13px;
   color: #1e293b;
   line-height: 1.4;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .item-meta {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-icon-delete {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  opacity: 0.2;
+  transition: all 0.15s ease;
+  color: #ef4444;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-card:hover .btn-icon-delete {
+  opacity: 0.75;
+}
+
+.btn-icon-delete:hover {
+  opacity: 1 !important;
+  background: #fee2e2;
+  transform: scale(1.1);
 }
 
 .badge-tag {
