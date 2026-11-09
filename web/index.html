@@ -59,16 +59,16 @@
         <!-- 顶部快速录入条 -->
         <div class="quick-input-card">
           <div class="input-row">
-            <input type="text" id="taskInput" class="task-text-input" placeholder="输入刚完成的事项，或计划要做的事项... (支持 #标签)" autocomplete="off">
+            <input type="text" id="taskInput" class="task-text-input" placeholder="输入待办事项或计划要做的工作... (支持 #标签)" autocomplete="off">
             <select id="visibilitySelect" class="visibility-picker">
               <option value="project_public">🌐 项目公开</option>
               <option value="private">🔒 仅自己可见 (私密)</option>
             </select>
-            <button id="btnMarkDone" class="btn btn-primary">⚡ 记为已完成</button>
-            <button id="btnCreateTodo" class="btn btn-secondary">+ 放入待办</button>
+            <button id="btnCreateTodo" class="btn btn-primary">+ 加入待办</button>
+            <button id="btnMarkDone" class="btn btn-secondary">⚡ 记为已完成</button>
           </div>
           <div class="quick-tips">
-            <span>💡 提示：输入内容后按 <b>Enter</b> 默认直接记为已完成；私密条目在生成团队周报时自动过滤保护。</span>
+            <span>💡 提示：输入内容后按 <b>Enter</b> 默认加入待办事项；完成工作后在待办列表勾选即可打卡并自动记录时间。</span>
           </div>
         </div>
 

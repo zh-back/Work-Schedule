@@ -296,13 +296,19 @@ extern "C" int gui_window_create_and_run(int http_port) {
 
     RegisterClassExW(&wc);
 
-    // Initial window size
-    int width = 1200;
-    int height = 800;
-    int screenW = GetSystemMetrics(SM_CXSCREEN);
-    int screenH = GetSystemMetrics(SM_CYSCREEN);
-    int x = (screenW - width) / 2;
-    int y = (screenH - height) / 2;
+    // Initial window size based on work area
+    RECT workArea;
+    SystemParametersInfoW(SPI_GETWORKAREA, 0, &workArea, 0);
+    int workW = workArea.right - workArea.left;
+    int workH = workArea.bottom - workArea.top;
+
+    // Sensible default window size: width 1160, height 760 or proportional to work area
+    int width = 1160;
+    int height = 760;
+    if (width > workW - 40) width = workW - 40;
+    if (height > workH - 40) height = workH - 40;
+    int x = workArea.left + (workW - width) / 2;
+    int y = workArea.top + (workH - height) / 2;
 
     HWND hwnd = CreateWindowExW(
         0,

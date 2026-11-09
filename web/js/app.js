@@ -41,12 +41,12 @@ function initEventListeners() {
   document.getElementById('taskInput').addEventListener('keydown', (e) => {
     if (e.isComposing) return;
     if (e.key === 'Enter') {
-      createItem(true); // Enter defaults to "⚡ 记为已完成"
+      createItem(false); // Enter defaults to "+ 加入待办"
     }
   });
 
-  document.getElementById('btnMarkDone').addEventListener('click', () => createItem(true));
   document.getElementById('btnCreateTodo').addEventListener('click', () => createItem(false));
+  document.getElementById('btnMarkDone').addEventListener('click', () => createItem(true));
 
   document.getElementById('userSelector').addEventListener('change', async (e) => {
     const newUserId = e.target.value;
