@@ -8,3 +8,5 @@
 *.db-shm
 .superpowers/
 /WebView2Loader.dll
+dist/
+*.WebView2/
