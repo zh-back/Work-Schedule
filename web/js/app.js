@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function initEventListeners() {
   document.getElementById('taskInput').addEventListener('keydown', (e) => {
+    if (e.isComposing) return;
     if (e.key === 'Enter') {
       createItem(true); // Enter defaults to "⚡ 记为已完成"
     }
@@ -107,7 +108,7 @@ async function loadProjects() {
     const li = document.createElement('li');
     li.className = 'project-item' + (p.id === g_currentProjectId ? ' active' : '');
     li.dataset.id = p.id;
-    li.innerHTML = `<span>📁 ${p.name}</span><span style="font-size:11px;color:#94a3b8;">${p.member_count}人</span>`;
+    li.innerHTML = `<span>📁 ${escapeHtml(p.name)}</span><span style="font-size:11px;color:#94a3b8;">${p.member_count}人</span>`;
     li.onclick = () => selectProject(p.id);
     ul.appendChild(li);
   });
@@ -117,7 +118,7 @@ async function loadProjects() {
   }
 }
 
-function selectProject(projId) {
+async function selectProject(projId) {
   g_currentProjectId = projId;
   const p = g_projects.find(x => x.id === projId);
   if (p) {
@@ -129,8 +130,8 @@ function selectProject(projId) {
     el.classList.toggle('active', el.dataset.id === projId);
   });
 
-  loadMembers();
-  loadItems();
+  await loadMembers();
+  await loadItems();
 }
 
 async function loadMembers() {
@@ -138,6 +139,17 @@ async function loadMembers() {
   const res = await fetch(`/api/members?project_id=${g_currentProjectId}`);
   if (!res.ok) return;
   g_members = await res.json();
+
+  // If current user is not in this project's members, switch to first member
+  const currentInProject = g_members.some(m => m.id === g_currentUserId);
+  if (!currentInProject && g_members.length > 0) {
+    g_currentUserId = g_members[0].id;
+    await fetch('/api/user/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: g_currentUserId })
+    });
+  }
 
   const userSelect = document.getElementById('userSelector');
   userSelect.innerHTML = '';
@@ -154,7 +166,7 @@ async function loadMembers() {
   g_members.forEach(m => {
     const li = document.createElement('li');
     li.className = 'member-item';
-    li.innerHTML = `<span>👤 ${m.name}</span><span class="member-role">${m.role}</span>`;
+    li.innerHTML = `<span>👤 ${escapeHtml(m.name)}</span><span class="member-role">${escapeHtml(m.role)}</span>`;
     memberUl.appendChild(li);
   });
 }
@@ -180,7 +192,7 @@ async function loadItems() {
       const card = document.createElement('div');
       card.className = 'item-card';
 
-      const tagHtml = item.tags ? `<span class="badge-tag">#${item.tags.replace(/,/g, ' #')}</span>` : '';
+      const tagHtml = item.tags ? `<span class="badge-tag">#${escapeHtml(item.tags.replace(/,/g, ' #'))}</span>` : '';
       const privHtml = item.visibility === 'private' ? '<span class="badge-priv">🔒私密</span>' : '';
 
       card.innerHTML = `
@@ -207,7 +219,7 @@ async function loadItems() {
       const card = document.createElement('div');
       card.className = 'item-card';
 
-      const tagHtml = item.tags ? `<span class="badge-tag">#${item.tags.replace(/,/g, ' #')}</span>` : '';
+      const tagHtml = item.tags ? `<span class="badge-tag">#${escapeHtml(item.tags.replace(/,/g, ' #'))}</span>` : '';
       const privHtml = item.visibility === 'private' ? '<span class="badge-priv">🔒私密</span>' : '';
       const timeStr = item.completed_at ? formatTime(item.completed_at) : '';
 

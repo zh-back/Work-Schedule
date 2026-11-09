@@ -1,0 +1,7 @@
+*.exe
+*.pdb
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.superpowers/

@@ -82,8 +82,15 @@ static int get_json_str(const char *body, const char *key, char *out_val, size_t
     if (*p == '"') {
         p++;
         size_t o = 0;
-        while (*p && *p != '"' && o + 1 < max_len) {
-            out_val[o++] = *p++;
+        while (*p && o + 1 < max_len) {
+            if (*p == '\\' && *(p + 1) != '\0') {
+                p++; // skip backslash escape
+                out_val[o++] = *p++;
+            } else if (*p == '"') {
+                break;
+            } else {
+                out_val[o++] = *p++;
+            }
         }
         out_val[o] = '\0';
         return 1;
@@ -246,26 +253,47 @@ static void handle_client(SOCKET client) {
         item_list_active_todos(p_id, u_id, &todos);
         item_list_today_dones(p_id, u_id, &dones);
 
-        char *resp = (char*)malloc(32768);
-        strcpy(resp, "{\"todos\":[");
+        size_t buf_cap = 65536;
+        char *resp = (char*)malloc(buf_cap);
+        if (!resp) {
+            send_http_response(client, 500, "application/json", "{\"error\":\"Out of memory\"}");
+            closesocket(client);
+            item_list_free(&todos);
+            item_list_free(&dones);
+            return;
+        }
+
+        size_t resp_len = snprintf(resp, buf_cap, "{\"todos\":[");
         for (int i = 0; i < todos.count; i++) {
-            char itm[512];
-            char escaped_c[512];
+            char escaped_c[1024];
             json_escape(todos.items[i].content, escaped_c, sizeof(escaped_c));
-            snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"visibility\":\"%s\",\"tags\":\"%s\"}",
-                     i > 0 ? "," : "", todos.items[i].id, escaped_c, todos.items[i].creator_name, todos.items[i].visibility, todos.items[i].tags);
-            strcat(resp, itm);
+            char itm[2048];
+            int n = snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"visibility\":\"%s\",\"tags\":\"%s\"}",
+                             i > 0 ? "," : "", todos.items[i].id, escaped_c, todos.items[i].creator_name, todos.items[i].visibility, todos.items[i].tags);
+            if (resp_len + (size_t)n + 2048 > buf_cap) {
+                buf_cap *= 2;
+                char *new_resp = (char*)realloc(resp, buf_cap);
+                if (new_resp) resp = new_resp;
+            }
+            strcpy(resp + resp_len, itm);
+            resp_len += n;
         }
-        strcat(resp, "],\"dones\":[");
+        resp_len += snprintf(resp + resp_len, buf_cap - resp_len, "],\"dones\":[");
         for (int i = 0; i < dones.count; i++) {
-            char itm[512];
-            char escaped_c[512];
+            char escaped_c[1024];
             json_escape(dones.items[i].content, escaped_c, sizeof(escaped_c));
-            snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"completed_at\":%lld,\"visibility\":\"%s\",\"tags\":\"%s\"}",
-                     i > 0 ? "," : "", dones.items[i].id, escaped_c, dones.items[i].creator_name, (long long)dones.items[i].completed_at, dones.items[i].visibility, dones.items[i].tags);
-            strcat(resp, itm);
+            char itm[2048];
+            int n = snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"completed_at\":%lld,\"visibility\":\"%s\",\"tags\":\"%s\"}",
+                             i > 0 ? "," : "", dones.items[i].id, escaped_c, dones.items[i].creator_name, (long long)dones.items[i].completed_at, dones.items[i].visibility, dones.items[i].tags);
+            if (resp_len + (size_t)n + 2048 > buf_cap) {
+                buf_cap *= 2;
+                char *new_resp = (char*)realloc(resp, buf_cap);
+                if (new_resp) resp = new_resp;
+            }
+            strcpy(resp + resp_len, itm);
+            resp_len += n;
         }
-        strcat(resp, "]}");
+        snprintf(resp + resp_len, buf_cap - resp_len, "]}");
 
         send_http_response(client, 200, "application/json; charset=utf-8", resp);
         free(resp);
@@ -334,6 +362,13 @@ static void handle_client(SOCKET client) {
     }
     // Static HTML/CSS/JS files serving
     else {
+        // Prevent path traversal
+        if (strstr(path, "..") != NULL) {
+            send_http_response(client, 403, "text/plain", "Forbidden: Invalid path");
+            closesocket(client);
+            return;
+        }
+
         char file_path[1024];
         if (strcmp(path, "/") == 0) {
             snprintf(file_path, sizeof(file_path), "web/index.html");
