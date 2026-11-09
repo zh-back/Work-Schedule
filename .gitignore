@@ -1,7 +1,10 @@
 *.exe
 *.pdb
+*.lib
+*.obj
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
 .superpowers/
+/WebView2Loader.dll
