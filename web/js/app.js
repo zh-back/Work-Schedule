@@ -11,6 +11,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initEventListeners() {
+  // Native window controls
+  const postWinAction = (act) => {
+    if (window.chrome && window.chrome.webview) {
+      window.chrome.webview.postMessage(act);
+    }
+  };
+
+  const btnMin = document.getElementById('btnWinMin');
+  const btnMax = document.getElementById('btnWinMax');
+  const btnClose = document.getElementById('btnWinClose');
+  if (btnMin) btnMin.addEventListener('click', () => postWinAction('minimize'));
+  if (btnMax) btnMax.addEventListener('click', () => postWinAction('maximize'));
+  if (btnClose) btnClose.addEventListener('click', () => postWinAction('close'));
+
+  // Window drag via top nav
+  const topNav = document.querySelector('.top-nav');
+  if (topNav) {
+    topNav.addEventListener('mousedown', (e) => {
+      if (['BUTTON', 'SELECT', 'INPUT', 'OPTION'].includes(e.target.tagName)) return;
+      postWinAction('drag');
+    });
+    topNav.addEventListener('dblclick', (e) => {
+      if (['BUTTON', 'SELECT', 'INPUT', 'OPTION'].includes(e.target.tagName)) return;
+      postWinAction('maximize');
+    });
+  }
+
   document.getElementById('taskInput').addEventListener('keydown', (e) => {
     if (e.isComposing) return;
     if (e.key === 'Enter') {

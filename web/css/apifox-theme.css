@@ -49,6 +49,7 @@ body {
   padding: 0 16px;
   border-bottom: 1px solid #1e293b;
   user-select: none;
+  cursor: default;
 }
 
 .brand {
@@ -80,6 +81,40 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+.window-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-right: -16px;
+}
+
+.win-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 44px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.win-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.win-btn-close:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 .user-label {
