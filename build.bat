@@ -17,6 +17,15 @@ if not exist "WebView2Loader.dll" (
     )
 )
 
+if "%1"=="clean" (
+    echo [CLEAN] Cleaning test and temporary binaries...
+    del /q /f tests\*.exe tests\*.pdb tests\*.lib 2>nul
+    rmdir /s /q tests\diag_wv.exe.WebView2 2>nul
+    del /q /f *.pdb *.lib check_*.* dump_*.* test_api_*.* test_item_api.* restore_*.* sync_*.* delete_*.* inspect_*.* schedule_worklog.db.bak 2>nul
+    echo [CLEAN] Done.
+    exit /b 0
+)
+
 if "%1"=="test" (
     echo ===================================================
     echo [TEST] Compiling and running unit tests...
