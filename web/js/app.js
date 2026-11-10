@@ -48,6 +48,17 @@ function initEventListeners() {
   document.getElementById('btnCreateTodo').addEventListener('click', () => createItem(false));
   document.getElementById('btnMarkDone').addEventListener('click', () => createItem(true));
 
+  document.querySelectorAll('.shortcut-tag').forEach(tagEl => {
+    tagEl.onclick = () => {
+      const input = document.getElementById('taskInput');
+      const tag = tagEl.dataset.tag;
+      if (!input.value.includes(tag)) {
+        input.value = (input.value.trim() + ' ' + tag).trim();
+      }
+      input.focus();
+    };
+  });
+
   document.getElementById('userSelector').addEventListener('change', async (e) => {
     const newUserId = e.target.value;
     if (newUserId && newUserId !== g_currentUserId) {

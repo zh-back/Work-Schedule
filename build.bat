@@ -1,5 +1,6 @@
 @echo off
 setlocal
+cd /d "%~dp0"
 set ZIG=D:\tools\zig-windows-x86_64-0.13.0\zig.exe
 if not exist "%ZIG%" (
     echo [ERROR] Zig compiler not found at: %ZIG%

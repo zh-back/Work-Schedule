@@ -331,17 +331,27 @@ extern "C" int gui_window_create_and_run(int http_port) {
 
     RegisterClassExW(&wc);
 
-    // Initial window size based on work area
+    // Dynamic adaptive window size based on current screen work area (resolution & DPI)
     RECT workArea;
     SystemParametersInfoW(SPI_GETWORKAREA, 0, &workArea, 0);
     int workW = workArea.right - workArea.left;
     int workH = workArea.bottom - workArea.top;
 
-    // Sensible default window size: width 1160, height 760 or proportional to work area
-    int width = 1160;
-    int height = 760;
-    if (width > workW - 40) width = workW - 40;
-    if (height > workH - 40) height = workH - 40;
+    // Default to a spacious 82% width and 85% height of the work area
+    int width = (int)(workW * 0.82);
+    int height = (int)(workH * 0.85);
+
+    // Maintain comfortable constraints
+    if (width < 1000) width = 1000;
+    if (width > 1650) width = 1650;
+    if (height < 680) height = 680;
+    if (height > 1100) height = 1100;
+
+    // Never exceed the usable screen area
+    if (width > workW - 20) width = workW - 20;
+    if (height > workH - 20) height = workH - 20;
+
+    // Center window in work area (avoids Windows taskbar)
     int x = workArea.left + (workW - width) / 2;
     int y = workArea.top + (workH - height) / 2;
 
