@@ -358,6 +358,13 @@ body {
   margin-top: 6px;
   font-size: 11px;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.shortcut-tag:hover {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
 }
 
 .workspace-header {
