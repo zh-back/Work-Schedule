@@ -160,6 +160,12 @@ HRESULT STDMETHODCALLTYPE ControllerCompletedHandler::Invoke(HRESULT hr, ICoreWe
         EventRegistrationToken token;
         g_webview->add_WebMessageReceived(new WebMessageReceivedHandler(m_hwnd), &token);
 
+        ICoreWebView2Settings *settings = NULL;
+        if (SUCCEEDED(g_webview->get_Settings(&settings)) && settings) {
+            settings->put_AreDefaultContextMenusEnabled(FALSE);
+            settings->Release();
+        }
+
         wchar_t url[256];
         swprintf_s(url, 256, L"http://127.0.0.1:%d/", m_port);
         g_webview->Navigate(url);

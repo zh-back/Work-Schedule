@@ -46,6 +46,10 @@
             <span class="capsule-arrow">▾</span>
           </div>
           <button id="addMemberBtn" class="btn-top-subtle" title="添加新成员">+ 成员</button>
+          <button id="themeToggleBtn" class="btn-top-subtle theme-toggle-btn" title="切换明暗主题 (Light / Dark)">
+            <span id="themeToggleIcon">🌙</span>
+            <span id="themeToggleText">深色</span>
+          </button>
         </div>
 
         <!-- Windows 原生无边框控制三键 (─, □, ✕) -->
@@ -314,6 +318,61 @@
         <button id="cancelConfirmBtn" class="btn btn-secondary">取消</button>
         <button id="submitConfirmBtn" class="btn btn-danger">确定删除</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 自定义右键操作菜单 (Apifox 旗舰浮动面板) -->
+  <div id="customContextMenu" class="custom-context-menu hidden">
+    <div class="context-menu-group" id="ctxGroupItem">
+      <button class="ctx-item" id="ctxBtnToggleStatus">
+        <span class="ctx-icon" id="ctxIconToggleStatus">⚡</span>
+        <span class="ctx-text" id="ctxTextToggleStatus">标记为已完成</span>
+      </button>
+      <button class="ctx-item" id="ctxBtnCopyContent">
+        <span class="ctx-icon">📋</span>
+        <span class="ctx-text">复制事项内容</span>
+      </button>
+      <button class="ctx-item ctx-danger" id="ctxBtnDeleteItem">
+        <span class="ctx-icon">🗑️</span>
+        <span class="ctx-text">删除该事项</span>
+      </button>
+      <div class="ctx-divider"></div>
+    </div>
+    
+    <div class="context-menu-group" id="ctxGroupText">
+      <button class="ctx-item" id="ctxBtnCopyText">
+        <span class="ctx-icon">📋</span>
+        <span class="ctx-text">复制所选文字</span>
+      </button>
+      <div class="ctx-divider"></div>
+    </div>
+
+    <div class="context-menu-group">
+      <button class="ctx-item" id="ctxBtnNewTodo">
+        <span class="ctx-icon">➕</span>
+        <span class="ctx-text">添加待办事项</span>
+      </button>
+      <button class="ctx-item" id="ctxBtnNewProject">
+        <span class="ctx-icon">📁</span>
+        <span class="ctx-text">新建协同项目</span>
+      </button>
+      <button class="ctx-item" id="ctxBtnAddMember">
+        <span class="ctx-icon">👤</span>
+        <span class="ctx-text">添加项目成员</span>
+      </button>
+      <div class="ctx-divider"></div>
+      <button class="ctx-item" id="ctxBtnToggleTheme">
+        <span class="ctx-icon" id="ctxIconTheme">☀️</span>
+        <span class="ctx-text" id="ctxTextTheme">切换明暗主题</span>
+      </button>
+      <button class="ctx-item" id="ctxBtnWeeklySummary">
+        <span class="ctx-icon">📊</span>
+        <span class="ctx-text">智能聚合周报</span>
+      </button>
+      <button class="ctx-item" id="ctxBtnRefresh">
+        <span class="ctx-icon">🔄</span>
+        <span class="ctx-text">刷新列表数据</span>
+      </button>
     </div>
   </div>
 

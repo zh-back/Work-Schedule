@@ -321,6 +321,193 @@ function initEventListeners() {
     }
   });
 
+  // --- 明暗主题切换系统 ---
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('app_theme', theme);
+    const isLight = theme === 'light';
+    const iconEl = document.getElementById('themeToggleIcon');
+    const textEl = document.getElementById('themeToggleText');
+    const ctxIcon = document.getElementById('ctxIconTheme');
+    const ctxText = document.getElementById('ctxTextTheme');
+
+    if (iconEl) iconEl.innerText = isLight ? '☀️' : '🌙';
+    if (textEl) textEl.innerText = isLight ? '浅色' : '深色';
+    if (ctxIcon) ctxIcon.innerText = isLight ? '🌙' : '☀️';
+    if (ctxText) ctxText.innerText = isLight ? '切换为深色主题' : '切换为浅色主题';
+  };
+
+  const toggleTheme = () => {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+  };
+
+  const savedTheme = localStorage.getItem('app_theme') || 'dark';
+  applyTheme(savedTheme);
+
+  const themeBtn = document.getElementById('themeToggleBtn');
+  if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+  const ctxThemeBtn = document.getElementById('ctxBtnToggleTheme');
+  if (ctxThemeBtn) ctxThemeBtn.addEventListener('click', () => {
+    toggleTheme();
+    hideContextMenu();
+  });
+
+  // --- 自定义右键操作菜单系统 ---
+  const ctxMenu = document.getElementById('customContextMenu');
+  let g_activeContextItem = null;
+  let g_selectedText = '';
+
+  const hideContextMenu = () => {
+    if (ctxMenu && !ctxMenu.classList.contains('hidden')) {
+      ctxMenu.classList.add('hidden');
+      g_activeContextItem = null;
+    }
+  };
+
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+
+    // 检查是否右键了事项卡片
+    const itemCard = e.target.closest('.item-card');
+    const ctxGroupItem = document.getElementById('ctxGroupItem');
+    const ctxGroupText = document.getElementById('ctxGroupText');
+
+    if (itemCard) {
+      const checkbox = itemCard.querySelector('.item-checkbox');
+      const isDone = checkbox && checkbox.classList.contains('item-checkbox-done');
+      const itemId = checkbox ? checkbox.dataset.id : null;
+      const contentEl = itemCard.querySelector('.item-content');
+      const content = contentEl ? contentEl.innerText.trim() : '';
+
+      g_activeContextItem = { id: itemId, content: content, isDone: isDone };
+
+      ctxGroupItem.style.display = 'block';
+      const iconToggle = document.getElementById('ctxIconToggleStatus');
+      const textToggle = document.getElementById('ctxTextToggleStatus');
+
+      if (isDone) {
+        iconToggle.innerText = '↩️';
+        textToggle.innerText = '恢复为待办 (取消完成)';
+      } else {
+        iconToggle.innerText = '⚡';
+        textToggle.innerText = '标记为已完成';
+      }
+    } else {
+      ctxGroupItem.style.display = 'none';
+      g_activeContextItem = null;
+    }
+
+    // 检查是否有选中文本
+    const sel = window.getSelection().toString().trim();
+    if (sel) {
+      ctxGroupText.style.display = 'block';
+      g_selectedText = sel;
+    } else {
+      ctxGroupText.style.display = 'none';
+      g_selectedText = '';
+    }
+
+    // 显示并定位右键菜单
+    ctxMenu.classList.remove('hidden');
+    const menuWidth = ctxMenu.offsetWidth || 184;
+    const menuHeight = ctxMenu.offsetHeight || 220;
+
+    let posX = e.clientX;
+    let posY = e.clientY;
+
+    if (posX + menuWidth > window.innerWidth) {
+      posX = window.innerWidth - menuWidth - 8;
+    }
+    if (posY + menuHeight > window.innerHeight) {
+      posY = window.innerHeight - menuHeight - 8;
+    }
+
+    ctxMenu.style.left = `${Math.max(8, posX)}px`;
+    ctxMenu.style.top = `${Math.max(8, posY)}px`;
+  });
+
+  document.addEventListener('click', (e) => {
+    if (ctxMenu && !ctxMenu.contains(e.target)) {
+      hideContextMenu();
+    }
+  });
+
+  window.addEventListener('scroll', hideContextMenu, true);
+  window.addEventListener('resize', hideContextMenu);
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideContextMenu();
+  });
+
+  document.getElementById('ctxBtnToggleStatus').addEventListener('click', () => {
+    if (g_activeContextItem && g_activeContextItem.id) {
+      if (g_activeContextItem.isDone) {
+        markItemTodo(g_activeContextItem.id);
+      } else {
+        markItemDone(g_activeContextItem.id);
+      }
+    }
+    hideContextMenu();
+  });
+
+  document.getElementById('ctxBtnCopyContent').addEventListener('click', async () => {
+    if (g_activeContextItem && g_activeContextItem.content) {
+      try {
+        await navigator.clipboard.writeText(g_activeContextItem.content);
+      } catch (err) {}
+    }
+    hideContextMenu();
+  });
+
+  document.getElementById('ctxBtnDeleteItem').addEventListener('click', () => {
+    if (g_activeContextItem && g_activeContextItem.id) {
+      deleteItem(g_activeContextItem.id, g_activeContextItem.content);
+    }
+    hideContextMenu();
+  });
+
+  document.getElementById('ctxBtnCopyText').addEventListener('click', async () => {
+    if (g_selectedText) {
+      try {
+        await navigator.clipboard.writeText(g_selectedText);
+      } catch (err) {}
+    }
+    hideContextMenu();
+  });
+
+  document.getElementById('ctxBtnNewTodo').addEventListener('click', () => {
+    hideContextMenu();
+    const input = document.getElementById('taskInput');
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  });
+
+  document.getElementById('ctxBtnNewProject').addEventListener('click', () => {
+    hideContextMenu();
+    openProjectModal();
+  });
+
+  document.getElementById('ctxBtnAddMember').addEventListener('click', () => {
+    hideContextMenu();
+    openMemberModal();
+  });
+
+  document.getElementById('ctxBtnWeeklySummary').addEventListener('click', () => {
+    hideContextMenu();
+    openSummary('project');
+  });
+
+  document.getElementById('ctxBtnRefresh').addEventListener('click', async () => {
+    hideContextMenu();
+    await loadProjects();
+    await loadMembers();
+    await loadItems();
+  });
+
   // 日期快捷分段 (今天 / 昨天 / 全部)
   document.querySelectorAll('.seg-btn').forEach(btn => {
     btn.addEventListener('click', () => {
