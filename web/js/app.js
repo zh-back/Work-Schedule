@@ -732,13 +732,18 @@ async function loadProjects() {
     ul.appendChild(li);
   });
 
-  if (!g_currentProjectId && g_projects.length > 0) {
-    selectProject(g_projects[0].id);
+  const savedProjId = localStorage.getItem('app_current_project');
+  let targetProj = g_projects.find(p => p.id === savedProjId) ||
+                   g_projects.find(p => p.name === 'Bytesforce') ||
+                   g_projects[0];
+  if (targetProj) {
+    selectProject(targetProj.id);
   }
 }
 
 async function selectProject(projId) {
   g_currentProjectId = projId;
+  localStorage.setItem('app_current_project', projId);
   const p = g_projects.find(x => x.id === projId);
   if (p) {
     document.getElementById('currentProjectTitle').innerText = p.name;
