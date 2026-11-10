@@ -19,6 +19,44 @@ function initEventListeners() {
     }
   };
 
+  // 侧边栏折叠/展开逻辑（默认隐藏）
+  const setSidebarCollapsed = (collapsed) => {
+    const mainBody = document.getElementById('mainBody');
+    const toggleArrow = document.getElementById('sidebarToggleArrow');
+    const dockPolyline = document.getElementById('dockArrowPolyline');
+    const dockBtn = document.getElementById('sidebarDockToggle');
+
+    if (mainBody) {
+      mainBody.classList.toggle('sidebar-collapsed', collapsed);
+    }
+    if (toggleArrow) {
+      toggleArrow.innerText = collapsed ? '›' : '‹';
+    }
+    if (dockPolyline) {
+      dockPolyline.setAttribute('points', collapsed ? '9 18 15 12 9 6' : '15 18 9 12 15 6');
+    }
+    if (dockBtn) {
+      dockBtn.title = collapsed ? '展开左侧项目与报表 (点击展开)' : '收起侧边栏';
+    }
+    localStorage.setItem('sidebar_collapsed', collapsed ? 'true' : 'false');
+  };
+
+  const toggleSidebar = () => {
+    const mainBody = document.getElementById('mainBody');
+    const isCollapsed = mainBody ? mainBody.classList.contains('sidebar-collapsed') : false;
+    setSidebarCollapsed(!isCollapsed);
+  };
+
+  const btnTopNav = document.getElementById('btnToggleSidebar');
+  if (btnTopNav) btnTopNav.addEventListener('click', toggleSidebar);
+
+  const btnDock = document.getElementById('sidebarDockToggle');
+  if (btnDock) btnDock.addEventListener('click', toggleSidebar);
+
+  // 初始化侧边栏状态（默认折叠）
+  const savedSidebar = localStorage.getItem('sidebar_collapsed');
+  setSidebarCollapsed(savedSidebar !== null ? savedSidebar === 'true' : true);
+
   const btnMin = document.getElementById('btnWinMin');
   const btnMax = document.getElementById('btnWinMax');
   const btnClose = document.getElementById('btnWinClose');

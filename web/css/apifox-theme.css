@@ -59,6 +59,38 @@ body {
   gap: 10px;
 }
 
+.topnav-sidebar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.topnav-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.sidebar-toggle-arrow {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.topnav-sidebar-btn:hover .sidebar-toggle-arrow {
+  color: #ffffff;
+}
+
 .brand-icon {
   font-size: 18px;
 }
@@ -150,6 +182,7 @@ body {
 
 /* 主体内容与侧边栏 */
 .main-body {
+  position: relative;
   display: flex;
   flex: 1;
   height: calc(100vh - 48px);
@@ -157,9 +190,47 @@ body {
   overflow: hidden;
 }
 
+/* 侧边吸附抽拉箭头按钮 (支持点击展开/折叠) */
+.sidebar-dock-toggle {
+  position: absolute;
+  top: 14px;
+  left: 200px;
+  z-index: 50;
+  width: 20px;
+  height: 38px;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+  color: #64748b;
+  transition: left 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.15s ease,
+              color 0.15s ease,
+              width 0.15s ease;
+  padding: 0;
+  outline: none;
+}
+
+.sidebar-dock-toggle:hover {
+  background: #eff6ff;
+  color: var(--primary-color);
+  width: 23px;
+}
+
+.main-body.sidebar-collapsed .sidebar-dock-toggle {
+  left: 0;
+  border-left: none;
+}
+
 .sidebar {
   width: 200px;
-  min-width: 180px;
+  min-width: 200px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   padding: 14px 10px;
@@ -167,7 +238,22 @@ body {
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex-shrink: 0;
+  white-space: nowrap;
+  transition: width 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.18s ease;
+}
+
+.main-body.sidebar-collapsed .sidebar {
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border-right: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .sidebar-header {
