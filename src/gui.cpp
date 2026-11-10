@@ -319,13 +319,31 @@ extern "C" int gui_window_create_and_run(int http_port) {
     g_port = http_port;
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
+    // Resolve absolute path to app.ico in application directory
+    wchar_t exePath[MAX_PATH] = {0};
+    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    wchar_t *lastSlash = wcsrchr(exePath, L'\\');
+    wchar_t icoPath[MAX_PATH] = {0};
+    if (lastSlash) {
+        *lastSlash = L'\0';
+        swprintf_s(icoPath, MAX_PATH, L"%s\\app.ico", exePath);
+    } else {
+        wcscpy_s(icoPath, MAX_PATH, L"app.ico");
+    }
+
+    HICON hIconBig = (HICON)LoadImageW(NULL, icoPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+    HICON hIconSm = (HICON)LoadImageW(NULL, icoPath, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+    if (!hIconBig) hIconBig = LoadIcon(NULL, IDI_APPLICATION);
+    if (!hIconSm) hIconSm = hIconBig;
+
     WNDCLASSEXW wc;
     memset(&wc, 0, sizeof(wc));
     wc.cbSize = sizeof(WNDCLASSEXW);
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIcon = hIconBig;
+    wc.hIconSm = hIconSm;
     wc.hbrBackground = CreateSolidBrush(RGB(15, 23, 42));
     wc.lpszClassName = L"ScheduleWorklogWindow";
 
@@ -366,6 +384,10 @@ extern "C" int gui_window_create_and_run(int http_port) {
 
     if (!hwnd) return -1;
     g_hwnd = hwnd;
+
+    // Explicitly set taskbar and titlebar icon
+    if (hIconBig) SendMessageW(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIconBig);
+    if (hIconSm) SendMessageW(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSm);
 
     // Enable native window shadow via DWM
     MARGINS margins = {1, 1, 1, 1};

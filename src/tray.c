@@ -36,13 +36,29 @@ void single_instance_cleanup(void) {
 }
 
 void tray_init(HWND hwnd, HINSTANCE hInstance, const wchar_t *tip) {
+    (void)hInstance;
     memset(&g_nid, 0, sizeof(g_nid));
     g_nid.cbSize = sizeof(NOTIFYICONDATAW);
     g_nid.hWnd = hwnd;
     g_nid.uID = 1;
     g_nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     g_nid.uCallbackMessage = WM_TRAYICON;
-    g_nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+
+    // Load custom app icon from application directory
+    wchar_t exePath[MAX_PATH] = {0};
+    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    wchar_t *lastSlash = wcsrchr(exePath, L'\\');
+    wchar_t icoPath[MAX_PATH] = {0};
+    if (lastSlash) {
+        *lastSlash = L'\0';
+        swprintf_s(icoPath, MAX_PATH, L"%s\\app.ico", exePath);
+    } else {
+        wcscpy_s(icoPath, MAX_PATH, L"app.ico");
+    }
+
+    HICON hIcon = (HICON)LoadImageW(NULL, icoPath, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+    if (!hIcon) hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    g_nid.hIcon = hIcon;
     wcsncpy(g_nid.szTip, tip ? tip : L"Schedule & WorkLog - 日程与工作记录", 127);
 
     Shell_NotifyIconW(NIM_ADD, &g_nid);
