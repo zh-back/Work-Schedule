@@ -201,8 +201,7 @@ function initEventListeners() {
   const calTrigger = document.getElementById('calendarTriggerBtn');
   const nativePicker = document.getElementById('nativeDatePicker');
   if (calTrigger && nativePicker) {
-    calTrigger.addEventListener('click', (e) => {
-      if (e.target.id === 'clearDateBtn') return;
+    calTrigger.addEventListener('click', () => {
       if (typeof nativePicker.showPicker === 'function') {
         nativePicker.showPicker();
       } else {
@@ -214,17 +213,6 @@ function initEventListeners() {
       const val = e.target.value;
       if (!val) return;
       g_currentFilterDate = val;
-      updateDateFilterUI();
-      loadItems();
-    });
-  }
-
-  // 清除自选日期，快捷返回“今天”
-  const clearBtn = document.getElementById('clearDateBtn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      g_currentFilterDate = 'today';
       updateDateFilterUI();
       loadItems();
     });
@@ -291,7 +279,6 @@ function updateDateFilterUI() {
   const tabs = document.querySelectorAll('.seg-btn');
   const calBtn = document.getElementById('calendarTriggerBtn');
   const calText = document.getElementById('calendarDateText');
-  const clearBtn = document.getElementById('clearDateBtn');
   const nativePicker = document.getElementById('nativeDatePicker');
 
   const todayStr = getISODateStr(new Date());
@@ -309,23 +296,19 @@ function updateDateFilterUI() {
   if (g_currentFilterDate === 'today') {
     if (calBtn) calBtn.classList.remove('active');
     if (calText) calText.innerText = '日历';
-    if (clearBtn) clearBtn.classList.add('hidden');
     if (nativePicker) nativePicker.value = todayStr;
   } else if (g_currentFilterDate === 'yesterday') {
     if (calBtn) calBtn.classList.remove('active');
     if (calText) calText.innerText = '日历';
-    if (clearBtn) clearBtn.classList.add('hidden');
     if (nativePicker) nativePicker.value = yesterdayStr;
   } else if (g_currentFilterDate === 'all') {
     if (calBtn) calBtn.classList.remove('active');
     if (calText) calText.innerText = '日历';
-    if (clearBtn) clearBtn.classList.add('hidden');
     if (nativePicker) nativePicker.value = '';
   } else {
     if (calBtn) calBtn.classList.add('active');
     const parts = g_currentFilterDate.split('-');
     if (calText) calText.innerText = parts.length === 3 ? `${parts[1]}-${parts[2]}` : g_currentFilterDate;
-    if (clearBtn) clearBtn.classList.remove('hidden');
     if (nativePicker) nativePicker.value = g_currentFilterDate;
   }
 }

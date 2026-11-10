@@ -662,26 +662,6 @@ body {
   stroke: currentColor;
 }
 
-.clear-date-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #dbeafe;
-  color: var(--primary-color);
-  margin-left: 2px;
-  line-height: 1;
-  transition: all 0.15s;
-}
-
-.clear-date-icon:hover {
-  background: #bfdbfe;
-  color: #1d4ed8;
-}
-
 .hidden-native-date {
   position: absolute;
   top: 0;
