@@ -83,11 +83,11 @@ function initEventListeners() {
   const topNav = document.querySelector('.top-nav');
   if (topNav) {
     topNav.addEventListener('mousedown', (e) => {
-      if (['BUTTON', 'SELECT', 'INPUT', 'OPTION'].includes(e.target.tagName)) return;
+      if (e.target.closest('button, select, input, textarea, a, .user-capsule, .window-controls')) return;
       postWinAction('drag');
     });
     topNav.addEventListener('dblclick', (e) => {
-      if (['BUTTON', 'SELECT', 'INPUT', 'OPTION'].includes(e.target.tagName)) return;
+      if (e.target.closest('button, select, input, textarea, a, .user-capsule, .window-controls')) return;
       postWinAction('maximize');
     });
   }
@@ -328,13 +328,13 @@ function initEventListeners() {
     const isLight = theme === 'light';
     const iconEl = document.getElementById('themeToggleIcon');
     const textEl = document.getElementById('themeToggleText');
-    const ctxIcon = document.getElementById('ctxIconTheme');
-    const ctxText = document.getElementById('ctxTextTheme');
+    const btn = document.getElementById('themeToggleBtn');
 
-    if (iconEl) iconEl.innerText = isLight ? '☀️' : '🌙';
-    if (textEl) textEl.innerText = isLight ? '浅色' : '深色';
-    if (ctxIcon) ctxIcon.innerText = isLight ? '🌙' : '☀️';
-    if (ctxText) ctxText.innerText = isLight ? '切换为深色主题' : '切换为浅色主题';
+    // 按钮文案与图标：指示点击后将切换的目标模式
+    // 如果当前为明亮模式，按钮显示“🌙 深色”；如果当前为深色模式，按钮显示“☀️ 浅色”
+    if (iconEl) iconEl.innerText = isLight ? '🌙' : '☀️';
+    if (textEl) textEl.innerText = isLight ? '深色' : '浅色';
+    if (btn) btn.title = isLight ? '点击切换为深色模式' : '点击切换为浅色模式';
   };
 
   const toggleTheme = () => {
@@ -347,13 +347,12 @@ function initEventListeners() {
   applyTheme(savedTheme);
 
   const themeBtn = document.getElementById('themeToggleBtn');
-  if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
-
-  const ctxThemeBtn = document.getElementById('ctxBtnToggleTheme');
-  if (ctxThemeBtn) ctxThemeBtn.addEventListener('click', () => {
-    toggleTheme();
-    hideContextMenu();
-  });
+  if (themeBtn) {
+    themeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTheme();
+    });
+  }
 
   // --- 自定义右键操作菜单系统 ---
   const ctxMenu = document.getElementById('customContextMenu');

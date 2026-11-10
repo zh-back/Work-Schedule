@@ -284,6 +284,12 @@ body {
   background: var(--bg-subtle) !important;
   padding: 3.5px 10px !important;
   font-weight: 500;
+  cursor: pointer !important;
+  user-select: none;
+}
+
+.theme-toggle-btn * {
+  pointer-events: none;
 }
 
 .theme-toggle-btn:hover {
