@@ -347,11 +347,12 @@ button.nav-tab-pill,
   cursor: pointer;
   outline: none;
   line-height: normal;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   max-width: 150px;
   pointer-events: auto;
   -webkit-app-region: no-drag;
+  position: relative;
 }
 
 .nav-tab-pill .nav-tab-title {
@@ -364,6 +365,11 @@ button.nav-tab-pill,
   background: var(--bg-subtle-hover);
   border-color: var(--border-hover);
   color: var(--text-body);
+  transform: translateY(-0.5px);
+}
+
+.nav-tab-pill:active {
+  transform: translateY(0.5px) scale(0.98);
 }
 
 .nav-tab-pill.active {
@@ -371,7 +377,31 @@ button.nav-tab-pill,
   border-color: var(--border-hover);
   color: var(--text-white);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+/* 顶部 Tab 激活状态底部流光指示条动画 */
+.nav-tab-pill.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: var(--apifox-purple);
+  border-radius: 2px;
+  animation: tabPillIndicator 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabPillIndicator {
+  from {
+    transform: scaleX(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 
 /* 亮色主题适配 */
@@ -398,6 +428,12 @@ button.nav-tab-pill,
   color: #0f172a;
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light-pure"] .nav-tab-pill.active::after,
+[data-theme="light-warm"] .nav-tab-pill.active::after,
+[data-theme="light"] .nav-tab-pill.active::after {
+  background: var(--apifox-purple);
 }
 
 .top-nav-right {
@@ -966,6 +1002,22 @@ button.nav-tab-pill,
   padding: 2px 2px 0 2px;
 }
 
+/* 项目与视图切换平滑过渡动效 */
+.content-fade-slide {
+  animation: contentFadeSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes contentFadeSlideIn {
+  0% {
+    opacity: 0.25;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .project-heading-row {
   display: flex;
   align-items: center;
@@ -1223,6 +1275,18 @@ button.nav-tab-pill,
   border: none;
   background: transparent;
   user-select: none;
+  animation: emptyStateFadeIn 0.22s ease-out;
+}
+
+@keyframes emptyStateFadeIn {
+  from {
+    opacity: 0.2;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .item-card {
@@ -1233,8 +1297,21 @@ button.nav-tab-pill,
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   position: relative;
+  animation: cardStaggerIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--item-idx, 0) * 22ms);
+}
+
+@keyframes cardStaggerIn {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .item-card:hover {

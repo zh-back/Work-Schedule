@@ -912,6 +912,20 @@ async function selectProject(projId) {
     if (descEl) descEl.innerText = p.description || '项目协同工作区';
   }
 
+  // 触发平滑过渡动画
+  const headerEl = document.querySelector('.workspace-header');
+  const gridEl = document.querySelector('.columns-grid');
+  if (headerEl) {
+    headerEl.classList.remove('content-fade-slide');
+    void headerEl.offsetWidth;
+    headerEl.classList.add('content-fade-slide');
+  }
+  if (gridEl) {
+    gridEl.classList.remove('content-fade-slide');
+    void gridEl.offsetWidth;
+    gridEl.classList.add('content-fade-slide');
+  }
+
   document.querySelectorAll('.project-item').forEach(el => {
     el.classList.toggle('active', el.dataset.id === projId);
   });
@@ -1015,9 +1029,10 @@ async function loadItems() {
   if (todoCount === 0) {
     todoContainer.innerHTML = '<div class="empty-state">暂无待办事项，输入上方事项添加</div>';
   } else {
-    data.todos.forEach(item => {
+    data.todos.forEach((item, idx) => {
       const card = document.createElement('div');
       card.className = 'item-card';
+      card.style.setProperty('--item-idx', Math.min(idx, 8));
 
       const tagHtml = item.tags ? `<span class="badge-tag">#${escapeHtml(item.tags.replace(/,/g, ' #'))}</span>` : '';
       const privHtml = item.visibility === 'private' ? '<span class="badge-priv">🔒私密</span>' : '';
@@ -1048,9 +1063,10 @@ async function loadItems() {
     doneContainer.innerHTML = `<div class="empty-state">${escapeHtml(doneEmptyText)}</div>`;
   } else {
     const isToday = g_currentFilterDate === 'today';
-    data.dones.forEach(item => {
+    data.dones.forEach((item, idx) => {
       const card = document.createElement('div');
       card.className = 'item-card';
+      card.style.setProperty('--item-idx', Math.min(idx, 8));
 
       const tagHtml = item.tags ? `<span class="badge-tag">#${escapeHtml(item.tags.replace(/,/g, ' #'))}</span>` : '';
       const privHtml = item.visibility === 'private' ? '<span class="badge-priv">🔒私密</span>' : '';
