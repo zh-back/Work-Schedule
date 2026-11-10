@@ -499,15 +499,21 @@ async function loadItems() {
       const timeStr = item.completed_at ? formatTime(item.completed_at, !isToday) : '';
 
       card.innerHTML = `
-        <span style="color:#10b981;font-weight:bold;">✓</span>
+        <input type="checkbox" class="item-checkbox item-checkbox-done" checked data-id="${item.id}" title="点击转回未完成 (撤销打卡)">
         <span class="item-time">${timeStr}</span>
         <div class="item-content">${escapeHtml(item.content)}</div>
         <div class="item-meta">
           ${tagHtml}
           ${privHtml}
         </div>
+        <button class="btn-icon-undo" title="恢复为待办 (转回未完成)" data-id="${item.id}">↩</button>
         <button class="btn-icon-delete" title="删除记录" data-id="${item.id}">🗑️</button>
       `;
+      card.querySelector('.item-checkbox').onchange = () => markItemTodo(item.id);
+      card.querySelector('.btn-icon-undo').onclick = (e) => {
+        e.stopPropagation();
+        markItemTodo(item.id);
+      };
       card.querySelector('.btn-icon-delete').onclick = (e) => {
         e.stopPropagation();
         deleteItem(item.id, item.content);
@@ -554,6 +560,18 @@ async function markItemDone(itemId) {
 
   if (res.ok) {
     g_currentFilterDate = 'today';
+    await loadItems();
+  }
+}
+
+async function markItemTodo(itemId) {
+  const res = await fetch('/api/items/todo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item_id: itemId })
+  });
+
+  if (res.ok) {
     await loadItems();
   }
 }

@@ -39,6 +39,9 @@ int item_create_todo(const char *project_id, const char *user_id, const char *co
 // Mark a todo item as completed (records current timestamp as completed_at)
 int item_mark_done(const char *item_id);
 
+// Revert a completed item back to active todo (resets status to 'todo' and completed_at to 0)
+int item_mark_todo(const char *item_id);
+
 // Soft delete a schedule item (sets deleted_at to current timestamp)
 int item_delete(const char *item_id);
 

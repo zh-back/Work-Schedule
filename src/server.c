@@ -376,6 +376,12 @@ static void handle_client(SOCKET client) {
         int rc = item_mark_done(item_id);
         send_http_response(client, rc == 0 ? 200 : 400, "application/json", rc == 0 ? "{\"success\":true}" : "{\"error\":\"Failed\"}");
     }
+    else if (strcmp(path, "/api/items/todo") == 0 && strcmp(method, "POST") == 0) {
+        char item_id[UUID_STR_LEN] = {0};
+        get_json_str(body, "item_id", item_id, sizeof(item_id));
+        int rc = item_mark_todo(item_id);
+        send_http_response(client, rc == 0 ? 200 : 400, "application/json", rc == 0 ? "{\"success\":true}" : "{\"error\":\"Failed\"}");
+    }
     else if ((strcmp(path, "/api/items/delete") == 0 || (strcmp(path, "/api/items") == 0 && strcmp(method, "DELETE") == 0)) && (strcmp(method, "POST") == 0 || strcmp(method, "DELETE") == 0)) {
         char item_id[UUID_STR_LEN] = {0};
         get_json_str(body, "item_id", item_id, sizeof(item_id));

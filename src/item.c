@@ -143,6 +143,26 @@ int item_mark_done(const char *item_id) {
     return (rc == SQLITE_DONE) ? 0 : -1;
 }
 
+int item_mark_todo(const char *item_id) {
+    if (!item_id) return -1;
+    sqlite3 *db = db_get_handle();
+    if (!db) return -1;
+
+    int64_t now = get_current_timestamp_ms();
+    const char *sql = "UPDATE schedule_items SET status = 'todo', completed_at = NULL, updated_at = ? WHERE id = ?;";
+
+    sqlite3_stmt *stmt = NULL;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) return rc;
+
+    sqlite3_bind_int64(stmt, 1, now);
+    sqlite3_bind_text(stmt, 2, item_id, -1, SQLITE_STATIC);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE) ? 0 : -1;
+}
+
 int item_delete(const char *item_id) {
     if (!item_id) return -1;
     sqlite3 *db = db_get_handle();

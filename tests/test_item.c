@@ -98,6 +98,26 @@ int test_schedule_item_flow(void) {
     ASSERT_EQ_INT(0, dones.count);
     item_list_free(&dones);
 
+    // 11. Test reverting completed item back to todo
+    rc = item_mark_todo(todo_id);
+    ASSERT_EQ_INT(0, rc);
+
+    // Verify active todos count is 1 again and status is 'todo'
+    memset(&todos, 0, sizeof(todos));
+    rc = item_list_active_todos(proj_id, current_user.id, &todos);
+    ASSERT_EQ_INT(0, rc);
+    ASSERT_EQ_INT(1, todos.count);
+    ASSERT_EQ_STR(todo_id, todos.items[0].id);
+    ASSERT_EQ_STR("todo", todos.items[0].status);
+    item_list_free(&todos);
+
+    // Verify today dones is now 0
+    memset(&dones, 0, sizeof(dones));
+    rc = item_list_today_dones(proj_id, current_user.id, &dones);
+    ASSERT_EQ_INT(0, rc);
+    ASSERT_EQ_INT(0, dones.count);
+    item_list_free(&dones);
+
     project_list_free(&plist);
     db_close();
     return 0;
