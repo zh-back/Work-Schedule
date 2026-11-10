@@ -48,6 +48,9 @@ int item_list_active_todos(const char *project_id, const char *user_id, ItemList
 // List completed items for today for project and user
 int item_list_today_dones(const char *project_id, const char *user_id, ItemList *out_list);
 
+// List completed items by date range in ms (start_ms <= 0 means no lower bound, end_ms <= 0 means no upper bound)
+int item_list_dones_by_date_range(const char *project_id, const char *user_id, int64_t start_ms, int64_t end_ms, ItemList *out_list);
+
 // Free an item list
 void item_list_free(ItemList *list);
 

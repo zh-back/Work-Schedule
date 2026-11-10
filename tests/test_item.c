@@ -83,6 +83,21 @@ int test_schedule_item_flow(void) {
     ASSERT_EQ_STR(todo_id, dones.items[0].id);
     item_list_free(&dones);
 
+    // 10. Test date range querying (all time vs future range)
+    memset(&dones, 0, sizeof(dones));
+    rc = item_list_dones_by_date_range(proj_id, current_user.id, 0, 0, &dones);
+    ASSERT_EQ_INT(0, rc);
+    ASSERT_EQ_INT(1, dones.count);
+    item_list_free(&dones);
+
+    // Future range test (should return 0)
+    int64_t future_ms = get_current_timestamp_ms() + 100000000LL;
+    memset(&dones, 0, sizeof(dones));
+    rc = item_list_dones_by_date_range(proj_id, current_user.id, future_ms, future_ms + 10000LL, &dones);
+    ASSERT_EQ_INT(0, rc);
+    ASSERT_EQ_INT(0, dones.count);
+    item_list_free(&dones);
+
     project_list_free(&plist);
     db_close();
     return 0;

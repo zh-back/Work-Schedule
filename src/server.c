@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -242,16 +243,64 @@ static void handle_client(SOCKET client) {
     else if (strcmp(path, "/api/items") == 0 && strcmp(method, "GET") == 0) {
         char proj_id[UUID_STR_LEN] = {0};
         char user_id[UUID_STR_LEN] = {0};
+        char date_param[64] = {0};
         get_query_param(query, "project_id", proj_id, sizeof(proj_id));
         get_query_param(query, "user_id", user_id, sizeof(user_id));
+        get_query_param(query, "date", date_param, sizeof(date_param));
 
         const char *p_id = strlen(proj_id) > 0 ? proj_id : NULL;
         const char *u_id = strlen(user_id) > 0 ? user_id : NULL;
 
+        int64_t start_ms = 0;
+        int64_t end_ms = 0;
+
+        int64_t now_ms = get_current_timestamp_ms();
+        time_t sec = (time_t)(now_ms / 1000LL);
+        struct tm l_tm;
+        localtime_s(&l_tm, &sec);
+
+        if (strcmp(date_param, "all") == 0) {
+            start_ms = 0;
+            end_ms = 0;
+        } else if (strcmp(date_param, "yesterday") == 0) {
+            l_tm.tm_hour = 0;
+            l_tm.tm_min = 0;
+            l_tm.tm_sec = 0;
+            l_tm.tm_mday -= 1;
+            time_t y_sec = mktime(&l_tm);
+            start_ms = (int64_t)y_sec * 1000LL;
+            end_ms = start_ms + 86400000LL - 1LL;
+        } else if (strlen(date_param) >= 10 && strchr(date_param, '-')) {
+            int y = 0, m = 0, d = 0;
+            if (sscanf(date_param, "%d-%d-%d", &y, &m, &d) == 3) {
+                struct tm t = {0};
+                t.tm_year = y - 1900;
+                t.tm_mon = m - 1;
+                t.tm_mday = d;
+                t.tm_hour = 0;
+                t.tm_min = 0;
+                t.tm_sec = 0;
+                t.tm_isdst = -1;
+                time_t target_sec = mktime(&t);
+                if (target_sec != (time_t)-1) {
+                    start_ms = (int64_t)target_sec * 1000LL;
+                    end_ms = start_ms + 86400000LL - 1LL;
+                }
+            }
+        } else {
+            // Default: today
+            l_tm.tm_hour = 0;
+            l_tm.tm_min = 0;
+            l_tm.tm_sec = 0;
+            time_t t_sec = mktime(&l_tm);
+            start_ms = (int64_t)t_sec * 1000LL;
+            end_ms = 0;
+        }
+
         ItemList todos;
         ItemList dones;
         item_list_active_todos(p_id, u_id, &todos);
-        item_list_today_dones(p_id, u_id, &dones);
+        item_list_dones_by_date_range(p_id, u_id, start_ms, end_ms, &dones);
 
         size_t buf_cap = 65536;
         char *resp = (char*)malloc(buf_cap);

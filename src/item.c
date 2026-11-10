@@ -261,12 +261,52 @@ int item_list_active_todos(const char *project_id, const char *user_id, ItemList
     return rc;
 }
 
-int item_list_today_dones(const char *project_id, const char *user_id, ItemList *out_list) {
+int item_list_dones_by_date_range(const char *project_id, const char *user_id, int64_t start_ms, int64_t end_ms, ItemList *out_list) {
     if (!out_list) return -1;
     sqlite3 *db = db_get_handle();
     if (!db) return -1;
 
-    // Calculate today's midnight timestamp in ms (UTC/local)
+    sqlite3_stmt *stmt = NULL;
+    int rc = sqlite3_prepare_v2(db, 
+        "SELECT si.id, si.project_id, si.creator_id, u.name, si.content, si.status, si.completed_at, si.visibility, si.tags, si.created_at, si.updated_at "
+        "FROM schedule_items si "
+        "JOIN users u ON si.creator_id = u.id "
+        "WHERE si.status = 'done' AND si.deleted_at IS NULL "
+        "AND (? <= 0 OR si.completed_at >= ?) "
+        "AND (? <= 0 OR si.completed_at <= ?) "
+        "AND (? IS NULL OR si.project_id = ?) "
+        "AND (? IS NULL OR si.creator_id = ?) "
+        "ORDER BY si.completed_at DESC;", -1, &stmt, NULL);
+
+    if (rc != SQLITE_OK) return rc;
+
+    sqlite3_bind_int64(stmt, 1, start_ms);
+    sqlite3_bind_int64(stmt, 2, start_ms);
+    sqlite3_bind_int64(stmt, 3, end_ms);
+    sqlite3_bind_int64(stmt, 4, end_ms);
+
+    if (project_id) {
+        sqlite3_bind_text(stmt, 5, project_id, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, project_id, -1, SQLITE_STATIC);
+    } else {
+        sqlite3_bind_null(stmt, 5);
+        sqlite3_bind_null(stmt, 6);
+    }
+
+    if (user_id) {
+        sqlite3_bind_text(stmt, 7, user_id, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 8, user_id, -1, SQLITE_STATIC);
+    } else {
+        sqlite3_bind_null(stmt, 7);
+        sqlite3_bind_null(stmt, 8);
+    }
+
+    rc = parse_items_from_stmt(stmt, out_list);
+    sqlite3_finalize(stmt);
+    return rc;
+}
+
+int item_list_today_dones(const char *project_id, const char *user_id, ItemList *out_list) {
     int64_t now = get_current_timestamp_ms();
     time_t sec = (time_t)(now / 1000LL);
     struct tm l_tm;
@@ -276,40 +316,7 @@ int item_list_today_dones(const char *project_id, const char *user_id, ItemList 
     l_tm.tm_sec = 0;
     int64_t today_start_ms = (int64_t)mktime(&l_tm) * 1000LL;
 
-    sqlite3_stmt *stmt = NULL;
-    int rc = sqlite3_prepare_v2(db, 
-        "SELECT si.id, si.project_id, si.creator_id, u.name, si.content, si.status, si.completed_at, si.visibility, si.tags, si.created_at, si.updated_at "
-        "FROM schedule_items si "
-        "JOIN users u ON si.creator_id = u.id "
-        "WHERE si.status = 'done' AND si.deleted_at IS NULL "
-        "AND si.completed_at >= ? "
-        "AND (? IS NULL OR si.project_id = ?) "
-        "AND (? IS NULL OR si.creator_id = ?) "
-        "ORDER BY si.completed_at DESC;", -1, &stmt, NULL);
-
-    if (rc != SQLITE_OK) return rc;
-
-    sqlite3_bind_int64(stmt, 1, today_start_ms);
-
-    if (project_id) {
-        sqlite3_bind_text(stmt, 2, project_id, -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 3, project_id, -1, SQLITE_STATIC);
-    } else {
-        sqlite3_bind_null(stmt, 2);
-        sqlite3_bind_null(stmt, 3);
-    }
-
-    if (user_id) {
-        sqlite3_bind_text(stmt, 4, user_id, -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 5, user_id, -1, SQLITE_STATIC);
-    } else {
-        sqlite3_bind_null(stmt, 4);
-        sqlite3_bind_null(stmt, 5);
-    }
-
-    rc = parse_items_from_stmt(stmt, out_list);
-    sqlite3_finalize(stmt);
-    return rc;
+    return item_list_dones_by_date_range(project_id, user_id, today_start_ms, 0, out_list);
 }
 
 void item_list_free(ItemList *list) {

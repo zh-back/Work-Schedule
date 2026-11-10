@@ -103,11 +103,18 @@
             </div>
           </div>
 
-          <!-- 右栏：今日已完成时间轴 -->
+          <!-- 右栏：已完成时间轴与历史日期回溯 -->
           <div class="panel panel-done">
-            <div class="panel-header">
-              <h3>✅ 今日已完成 (Done Timeline)</h3>
-              <span class="panel-tip">已按完成时间打卡</span>
+            <div class="panel-header" style="flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 id="donePanelTitle">✅ 今日已完成 (Done Timeline)</h3>
+              </div>
+              <div class="date-filter-group">
+                <button class="date-filter-btn active" data-date="today">今天</button>
+                <button class="date-filter-btn" data-date="yesterday">昨天</button>
+                <button class="date-filter-btn" data-date="all">全部</button>
+                <input type="date" id="customDatePicker" class="custom-date-picker" title="选择指定日期">
+              </div>
             </div>
             <div id="doneListContainer" class="items-list">
               <div class="empty-state">今天还没有记录已完成的工作</div>

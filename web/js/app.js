@@ -3,6 +3,7 @@ let g_currentProjectId = null;
 let g_currentUserId = null;
 let g_projects = [];
 let g_members = [];
+let g_currentFilterDate = 'today';
 
 document.addEventListener('DOMContentLoaded', async () => {
   initEventListeners();
@@ -124,6 +125,34 @@ function initEventListeners() {
       alert('已选中内容，请按 Ctrl+C 复制');
     }
   });
+
+  // 日期快速切换按钮事件绑定
+  document.querySelectorAll('.date-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.date-filter-btn').forEach(b => b.classList.remove('active'));
+      const picker = document.getElementById('customDatePicker');
+      if (picker) {
+        picker.value = '';
+        picker.classList.remove('active');
+      }
+      btn.classList.add('active');
+      g_currentFilterDate = btn.dataset.date;
+      loadItems();
+    });
+  });
+
+  // 自定义日期选择器事件
+  const customPicker = document.getElementById('customDatePicker');
+  if (customPicker) {
+    customPicker.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (!val) return;
+      document.querySelectorAll('.date-filter-btn').forEach(b => b.classList.remove('active'));
+      customPicker.classList.add('active');
+      g_currentFilterDate = val;
+      loadItems();
+    });
+  }
 }
 
 async function loadCurrentUser() {
@@ -211,14 +240,40 @@ async function loadMembers() {
 
 async function loadItems() {
   if (!g_currentProjectId || !g_currentUserId) return;
-  const res = await fetch(`/api/items?project_id=${g_currentProjectId}&user_id=${g_currentUserId}`);
+  const res = await fetch(`/api/items?project_id=${g_currentProjectId}&user_id=${g_currentUserId}&date=${encodeURIComponent(g_currentFilterDate)}`);
   if (!res.ok) return;
   const data = await res.json();
 
   const todoCount = data.todos ? data.todos.length : 0;
   const doneCount = data.dones ? data.dones.length : 0;
   document.getElementById('todoCountPill').innerText = `待办: ${todoCount}`;
-  document.getElementById('doneCountPill').innerText = `今日完成: ${doneCount}`;
+
+  // 动态更新已完成栏标题、统计徽章和空状态提示
+  let doneTitle = '✅ 今日已完成 (Done Timeline)';
+  let doneEmptyText = '今天还没有记录已完成的工作';
+  let donePillText = `今日完成: ${doneCount}`;
+
+  if (g_currentFilterDate === 'today') {
+    doneTitle = '✅ 今日已完成 (Done Timeline)';
+    doneEmptyText = '今天还没有记录已完成的工作';
+    donePillText = `今日完成: ${doneCount}`;
+  } else if (g_currentFilterDate === 'yesterday') {
+    doneTitle = '📅 昨天已完成 (Yesterday Done)';
+    doneEmptyText = '昨天没有记录已完成的工作';
+    donePillText = `昨天完成: ${doneCount}`;
+  } else if (g_currentFilterDate === 'all') {
+    doneTitle = '📚 全部历史已完成 (All History)';
+    doneEmptyText = '暂无已完成的工作记录';
+    donePillText = `累计完成: ${doneCount}`;
+  } else {
+    doneTitle = `📅 ${g_currentFilterDate} 已完成`;
+    doneEmptyText = `${g_currentFilterDate} 还没有记录已完成的工作`;
+    donePillText = `${g_currentFilterDate} 完成: ${doneCount}`;
+  }
+
+  const titleEl = document.getElementById('donePanelTitle');
+  if (titleEl) titleEl.innerText = doneTitle;
+  document.getElementById('doneCountPill').innerText = donePillText;
 
   // Render Todos
   const todoContainer = document.getElementById('todoListContainer');
@@ -256,15 +311,16 @@ async function loadItems() {
   const doneContainer = document.getElementById('doneListContainer');
   doneContainer.innerHTML = '';
   if (doneCount === 0) {
-    doneContainer.innerHTML = '<div class="empty-state">今天还没有记录已完成的工作</div>';
+    doneContainer.innerHTML = `<div class="empty-state">${escapeHtml(doneEmptyText)}</div>`;
   } else {
+    const isToday = g_currentFilterDate === 'today';
     data.dones.forEach(item => {
       const card = document.createElement('div');
       card.className = 'item-card';
 
       const tagHtml = item.tags ? `<span class="badge-tag">#${escapeHtml(item.tags.replace(/,/g, ' #'))}</span>` : '';
       const privHtml = item.visibility === 'private' ? '<span class="badge-priv">🔒私密</span>' : '';
-      const timeStr = item.completed_at ? formatTime(item.completed_at) : '';
+      const timeStr = item.completed_at ? formatTime(item.completed_at, !isToday) : '';
 
       card.innerHTML = `
         <span style="color:#10b981;font-weight:bold;">✓</span>
@@ -361,10 +417,15 @@ async function openSummary(type) {
   }
 }
 
-function formatTime(tsMs) {
+function formatTime(tsMs, showDate = false) {
   const d = new Date(tsMs);
   const h = String(d.getHours()).padStart(2, '0');
   const m = String(d.getMinutes()).padStart(2, '0');
+  if (showDate) {
+    const mon = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${mon}-${day} ${h}:${m}`;
+  }
   return `${h}:${m}`;
 }
 
