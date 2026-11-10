@@ -321,38 +321,102 @@ function initEventListeners() {
     }
   });
 
-  // --- 明暗主题切换系统 ---
-  const applyTheme = (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('app_theme', theme);
-    const isLight = theme === 'light';
-    const iconEl = document.getElementById('themeToggleIcon');
-    const textEl = document.getElementById('themeToggleText');
-    const btn = document.getElementById('themeToggleBtn');
+  // --- Apifox 官方风格外观偏好与设置系统 ---
+  const settingsModal = document.getElementById('settingsModal');
+  const openSettingsBtn = document.getElementById('openSettingsBtn');
+  const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
 
-    // 按钮文案与图标：指示点击后将切换的目标模式
-    // 如果当前为明亮模式，按钮显示“🌙 深色”；如果当前为深色模式，按钮显示“☀️ 浅色”
-    if (iconEl) iconEl.innerText = isLight ? '🌙' : '☀️';
-    if (textEl) textEl.innerText = isLight ? '深色' : '浅色';
-    if (btn) btn.title = isLight ? '点击切换为深色模式' : '点击切换为浅色模式';
-  };
+  function openSettingsModal(tabName = 'appearance') {
+    if (!settingsModal) return;
+    settingsModal.classList.remove('hidden');
+    switchSettingsTab(tabName);
+  }
 
-  const toggleTheme = () => {
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
-    const next = current === 'light' ? 'dark' : 'light';
-    applyTheme(next);
-  };
+  function closeSettingsModal() {
+    if (settingsModal) settingsModal.classList.add('hidden');
+  }
 
-  const savedTheme = localStorage.getItem('app_theme') || 'dark';
-  applyTheme(savedTheme);
-
-  const themeBtn = document.getElementById('themeToggleBtn');
-  if (themeBtn) {
-    themeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleTheme();
+  function switchSettingsTab(tabName) {
+    document.querySelectorAll('.settings-nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.tab === tabName);
+    });
+    document.querySelectorAll('.settings-tab-pane').forEach(pane => {
+      pane.classList.toggle('active', pane.id === `pane${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
     });
   }
+
+  if (openSettingsBtn) openSettingsBtn.addEventListener('click', () => openSettingsModal('appearance'));
+  if (closeSettingsModalBtn) closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
+
+  document.querySelectorAll('.settings-nav-item').forEach(item => {
+    item.addEventListener('click', () => switchSettingsTab(item.dataset.tab));
+  });
+
+  // 1. 背景预设切换
+  function applyBgTheme(themeName) {
+    document.documentElement.setAttribute('data-theme', themeName);
+    localStorage.setItem('app_bg_theme', themeName);
+    document.querySelectorAll('.theme-card').forEach(card => {
+      card.classList.toggle('active', card.dataset.theme === themeName);
+    });
+  }
+
+  document.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', () => {
+      applyBgTheme(card.dataset.theme);
+    });
+  });
+
+  // 2. 主题主色 (Accent Color) 切换
+  function applyPrimaryColor(color) {
+    document.documentElement.style.setProperty('--apifox-purple', color);
+    document.documentElement.style.setProperty('--apifox-purple-gradient', `linear-gradient(135deg, ${color} 0%, #6366f1 100%)`);
+    localStorage.setItem('app_primary_color', color);
+
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+      const match = swatch.dataset.color.toLowerCase() === color.toLowerCase();
+      swatch.classList.toggle('active', match);
+      swatch.innerText = match ? '✓' : '';
+    });
+  }
+
+  document.querySelectorAll('.color-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      applyPrimaryColor(swatch.dataset.color);
+    });
+  });
+
+  // 3. 字体大小缩放 (Font Scale Slider)
+  const fontSlider = document.getElementById('fontScaleSlider');
+  function applyFontScale(pct) {
+    document.documentElement.style.fontSize = `${pct}%`;
+    localStorage.setItem('app_font_scale', pct);
+    if (fontSlider) fontSlider.value = pct;
+  }
+
+  if (fontSlider) {
+    fontSlider.addEventListener('input', (e) => {
+      applyFontScale(e.target.value);
+    });
+  }
+
+  // 初始化恢复用户偏好
+  const savedBgTheme = localStorage.getItem('app_bg_theme') || 'dark-classic';
+  applyBgTheme(savedBgTheme);
+
+  const savedColor = localStorage.getItem('app_primary_color') || '#7c3aed';
+  applyPrimaryColor(savedColor);
+
+  const savedFontScale = localStorage.getItem('app_font_scale') || '100';
+  applyFontScale(savedFontScale);
+
+  // 全局快捷键 Ctrl+, 打开设置
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+      e.preventDefault();
+      openSettingsModal('appearance');
+    }
+  });
 
   // --- 自定义右键操作菜单系统 ---
   const ctxMenu = document.getElementById('customContextMenu');
@@ -499,6 +563,14 @@ function initEventListeners() {
     hideContextMenu();
     openSummary('project');
   });
+
+  const ctxBtnSettings = document.getElementById('ctxBtnSettings');
+  if (ctxBtnSettings) {
+    ctxBtnSettings.addEventListener('click', () => {
+      hideContextMenu();
+      openSettingsModal('appearance');
+    });
+  }
 
   document.getElementById('ctxBtnRefresh').addEventListener('click', async () => {
     hideContextMenu();

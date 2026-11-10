@@ -46,9 +46,11 @@
             <span class="capsule-arrow">▾</span>
           </div>
           <button id="addMemberBtn" class="btn-top-subtle" title="添加新成员">+ 成员</button>
-          <button id="themeToggleBtn" class="btn-top-subtle theme-toggle-btn" title="切换明暗主题 (Light / Dark)">
-            <span id="themeToggleIcon">🌙</span>
-            <span id="themeToggleText">深色</span>
+          <button id="openSettingsBtn" class="win-btn-settings" title="外观与系统设置 (Ctrl+,)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
           </button>
         </div>
 
@@ -321,6 +323,182 @@
     </div>
   </div>
 
+  <!-- Apifox 官方风格外观偏好与设置弹窗 Modal -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="settings-modal-box">
+      <!-- 弹窗左侧导航栏 -->
+      <aside class="settings-sidebar">
+        <div class="settings-sidebar-group">
+          <div class="settings-group-title">偏好设置</div>
+          <ul class="settings-nav-list">
+            <li class="settings-nav-item active" data-tab="appearance">
+              <span class="settings-nav-icon">👕</span>
+              <span>外观</span>
+            </li>
+            <li class="settings-nav-item" data-tab="general">
+              <span class="settings-nav-icon">⚙️</span>
+              <span>通用</span>
+            </li>
+            <li class="settings-nav-item" data-tab="shortcuts">
+              <span class="settings-nav-icon">⌨️</span>
+              <span>快捷键</span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- 弹窗右侧主内容区 -->
+      <div class="settings-content-wrap">
+        <button id="closeSettingsModal" class="settings-close-btn" title="关闭">&times;</button>
+        
+        <!-- 外观设置 Tab Pane -->
+        <div class="settings-tab-pane active" id="paneAppearance">
+          <h2 class="settings-pane-title">外观</h2>
+          
+          <!-- 背景主题选项 -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">背景</h4>
+            <div class="theme-cards-grid">
+              <!-- 1. 经典暗黑 -->
+              <div class="theme-card active" data-theme="dark-classic" title="经典暗黑 (Apifox 默认)">
+                <div class="theme-preview preview-dark-classic">
+                  <div class="prev-sidebar"></div>
+                  <div class="prev-content">
+                    <div class="prev-bar"></div>
+                    <div class="prev-lines"><span></span><span></span></div>
+                  </div>
+                </div>
+                <span class="theme-card-name">经典暗黑</span>
+              </div>
+              <!-- 2. 墨夜深黑 -->
+              <div class="theme-card" data-theme="dark-pure" title="墨夜深黑">
+                <div class="theme-preview preview-dark-pure">
+                  <div class="prev-sidebar"></div>
+                  <div class="prev-content">
+                    <div class="prev-bar"></div>
+                    <div class="prev-lines"><span></span><span></span></div>
+                  </div>
+                </div>
+                <span class="theme-card-name">墨夜深黑</span>
+              </div>
+              <!-- 3. 极客黛蓝 -->
+              <div class="theme-card" data-theme="dark-navy" title="极客黛蓝">
+                <div class="theme-preview preview-dark-navy">
+                  <div class="prev-sidebar"></div>
+                  <div class="prev-content">
+                    <div class="prev-bar"></div>
+                    <div class="prev-lines"><span></span><span></span></div>
+                  </div>
+                </div>
+                <span class="theme-card-name">极客黛蓝</span>
+              </div>
+              <!-- 4. 经典纯白 -->
+              <div class="theme-card" data-theme="light-pure" title="经典纯白">
+                <div class="theme-preview preview-light-pure">
+                  <div class="prev-sidebar"></div>
+                  <div class="prev-content">
+                    <div class="prev-bar"></div>
+                    <div class="prev-lines"><span></span><span></span></div>
+                  </div>
+                </div>
+                <span class="theme-card-name">经典纯白</span>
+              </div>
+              <!-- 5. 护眼暖白 -->
+              <div class="theme-card" data-theme="light-warm" title="护眼暖白">
+                <div class="theme-preview preview-light-warm">
+                  <div class="prev-sidebar"></div>
+                  <div class="prev-content">
+                    <div class="prev-bar"></div>
+                    <div class="prev-lines"><span></span><span></span></div>
+                  </div>
+                </div>
+                <span class="theme-card-name">护眼暖白</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 主色选项 -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">主色</h4>
+            <div class="primary-color-row">
+              <button class="color-swatch active" data-color="#7c3aed" style="background:#7c3aed" title="电光紫 (Apifox 标志)">✓</button>
+              <button class="color-swatch" data-color="#6366f1" style="background:#6366f1" title="极光青紫"></button>
+              <button class="color-swatch" data-color="#3b82f6" style="background:#3b82f6" title="蔚蓝海洋"></button>
+              <button class="color-swatch" data-color="#06b6d4" style="background:#06b6d4" title="晴空碧蓝"></button>
+              <button class="color-swatch" data-color="#10b981" style="background:#10b981" title="翡翠薄荷"></button>
+              <button class="color-swatch" data-color="#f59e0b" style="background:#f59e0b" title="琥珀暖金"></button>
+              <button class="color-swatch" data-color="#ec4899" style="background:#ec4899" title="绚丽玫粉"></button>
+              <button class="color-swatch" data-color="#f43f5e" style="background:#f43f5e" title="珊瑚西柚"></button>
+              <button class="color-swatch" data-color="#a8a29e" style="background:#a8a29e" title="雅致暖茶"></button>
+            </div>
+          </div>
+
+          <!-- 字体大小缩放 -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">字体大小</h4>
+            <div class="font-scale-control">
+              <input type="range" id="fontScaleSlider" min="80" max="130" step="10" value="100" class="font-slider">
+              <div class="font-scale-labels">
+                <span>80%</span>
+                <span>90%</span>
+                <span>100%</span>
+                <span>110%</span>
+                <span>120%</span>
+                <span>130%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 通用设置 Tab Pane -->
+        <div class="settings-tab-pane" id="paneGeneral">
+          <h2 class="settings-pane-title">通用信息</h2>
+          <div class="settings-info-list">
+            <div class="info-row">
+              <span class="info-label">应用版本</span>
+              <span class="info-value">Schedule & WorkLog v1.0.0</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">核心内核</span>
+              <span class="info-value">C-Engine Native + Microsoft Edge WebView2</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">存储引擎</span>
+              <span class="info-value">本地 SQLite WAL 高性能事务引擎</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">常驻守护</span>
+              <span class="info-value">Windows 单实例互斥锁与原生托盘通知</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷键 Tab Pane -->
+        <div class="settings-tab-pane" id="paneShortcuts">
+          <h2 class="settings-pane-title">快捷键列表</h2>
+          <div class="shortcuts-table">
+            <div class="shortcut-row">
+              <span>快速加入待办</span>
+              <kbd>Enter</kbd>
+            </div>
+            <div class="shortcut-row">
+              <span>打开外观与偏好设置</span>
+              <kbd>Ctrl + ,</kbd>
+            </div>
+            <div class="shortcut-row">
+              <span>关闭弹窗 / 浮动菜单</span>
+              <kbd>Esc</kbd>
+            </div>
+            <div class="shortcut-row">
+              <span>专属操作菜单</span>
+              <kbd>鼠标右键</kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 自定义右键操作菜单 (Apifox 旗舰浮动面板) -->
   <div id="customContextMenu" class="custom-context-menu hidden">
     <div class="context-menu-group" id="ctxGroupItem">
@@ -364,6 +542,10 @@
       <button class="ctx-item" id="ctxBtnWeeklySummary">
         <span class="ctx-icon">📊</span>
         <span class="ctx-text">智能聚合周报</span>
+      </button>
+      <button class="ctx-item" id="ctxBtnSettings">
+        <span class="ctx-icon">⚙️</span>
+        <span class="ctx-text">偏好与外观设置...</span>
       </button>
       <button class="ctx-item" id="ctxBtnRefresh">
         <span class="ctx-icon">🔄</span>
