@@ -20,6 +20,12 @@ static BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
 }
 
 int main(int argc, char *argv[]) {
+    // Hide console window if any exists
+    HWND hConsole = GetConsoleWindow();
+    if (hConsole) {
+        ShowWindow(hConsole, SW_HIDE);
+    }
+
     // 1. Single-instance protection: restore existing window if already running
     if (check_single_instance("Global\\ScheduleWorkLog_SingleInstance") != 0) {
         // Existing instance was brought to foreground; safely exit duplicate process
@@ -78,4 +84,12 @@ int main(int argc, char *argv[]) {
     single_instance_cleanup();
 
     return 0;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    (void)hInstance;
+    (void)hPrevInstance;
+    (void)lpCmdLine;
+    (void)nCmdShow;
+    return main(__argc, __argv);
 }

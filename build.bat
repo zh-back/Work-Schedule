@@ -73,7 +73,7 @@ if "%1"=="test" (
 )
 
 echo [BUILD] Compiling Schedule and WorkLog desktop client...
-"%ZIG%" c++ %CXXFLAGS% src/main.c %ALL_SRC% -o schedule_worklog.exe
+"%ZIG%" c++ %CXXFLAGS% -Wl,/subsystem:windows src/main.c %ALL_SRC% -o schedule_worklog.exe
 if errorlevel 1 (
     echo [ERROR] Build failed!
     exit /b 1
