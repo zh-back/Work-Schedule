@@ -4,6 +4,7 @@ let g_currentUserId = null;
 let g_projects = [];
 let g_members = [];
 let g_currentFilterDate = 'today';
+let g_isPrivate = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   initEventListeners();
@@ -100,6 +101,26 @@ function initEventListeners() {
       input.focus();
     };
   });
+
+  // 可见性极简胶囊切换 (公开 / 仅自己可见)
+  const visToggleBtn = document.getElementById('visibilityToggleBtn');
+  if (visToggleBtn) {
+    visToggleBtn.addEventListener('click', () => {
+      g_isPrivate = !g_isPrivate;
+      visToggleBtn.classList.toggle('is-private', g_isPrivate);
+      const icon = document.getElementById('visStatusIcon');
+      const label = document.getElementById('visStatusLabel');
+      if (g_isPrivate) {
+        if (icon) icon.innerText = '🔒';
+        if (label) label.innerText = '仅自己可见 (私密)';
+        visToggleBtn.title = '当前为私密事项，仅自己可见 (点击切回公开)';
+      } else {
+        if (icon) icon.innerText = '🌐';
+        if (label) label.innerText = '项目公开';
+        visToggleBtn.title = '当前为项目公开事项 (点击切换为私密)';
+      }
+    });
+  }
 
   document.getElementById('userSelector').addEventListener('change', async (e) => {
     const newUserId = e.target.value;
@@ -502,8 +523,7 @@ async function createItem(isDone) {
   const content = input.value.trim();
   if (!content) return;
 
-  const vis = document.getElementById('visibilitySelect').value;
-  const isPrivate = vis === 'private' ? 1 : 0;
+  const isPrivate = g_isPrivate ? 1 : 0;
 
   const res = await fetch('/api/items', {
     method: 'POST',

@@ -74,20 +74,22 @@
         <div class="quick-input-card">
           <div class="input-row">
             <input type="text" id="taskInput" class="task-text-input" placeholder="输入待办事项或计划要做的工作... (支持 #标签)" autocomplete="off">
-            <select id="visibilitySelect" class="visibility-picker">
-              <option value="project_public">🌐 项目公开</option>
-              <option value="private">🔒 仅自己可见 (私密)</option>
-            </select>
             <button id="btnCreateTodo" class="btn btn-primary">+ 加入待办</button>
           </div>
-          <div class="quick-tips">
-            <span>快捷标签：</span>
-            <div class="tag-shortcuts" style="display:inline-flex; gap:6px; margin-left:2px;">
-              <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#需求开发">#需求开发</span>
-              <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#Bug修复">#Bug修复</span>
-              <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#方案评审">#方案评审</span>
-              <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#性能优化">#性能优化</span>
+          <div class="quick-tips-bar">
+            <div class="quick-tips">
+              <span>快捷标签：</span>
+              <div class="tag-shortcuts" style="display:inline-flex; gap:6px; margin-left:2px;">
+                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#需求开发">#需求开发</span>
+                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#Bug修复">#Bug修复</span>
+                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#方案评审">#方案评审</span>
+                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#性能优化">#性能优化</span>
+              </div>
             </div>
+            <button type="button" id="visibilityToggleBtn" class="visibility-subtle-toggle" title="点击切换：公开 / 仅自己可见">
+              <span id="visStatusIcon">🌐</span>
+              <span id="visStatusLabel">项目公开</span>
+            </button>
           </div>
         </div>
 
