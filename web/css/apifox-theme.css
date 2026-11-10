@@ -327,8 +327,11 @@ body {
   align-items: center;
   gap: 6px;
   height: 100%;
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
 }
 
+button.nav-tab-pill,
 .nav-tab-pill {
   display: inline-flex;
   align-items: center;
@@ -339,11 +342,16 @@ body {
   padding: 3.5px 12px;
   font-size: 12px;
   font-weight: 500;
+  font-family: inherit;
   color: var(--text-muted);
   cursor: pointer;
+  outline: none;
+  line-height: normal;
   transition: all 0.15s ease;
   user-select: none;
   max-width: 150px;
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
 }
 
 .nav-tab-pill .nav-tab-title {

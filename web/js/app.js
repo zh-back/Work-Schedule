@@ -100,11 +100,11 @@ function initEventListeners() {
   const topNav = document.querySelector('.top-nav');
   if (topNav) {
     topNav.addEventListener('mousedown', (e) => {
-      if (e.target.closest('button, select, input, textarea, a, .user-capsule, .window-controls')) return;
+      if (e.target.closest('button, select, input, textarea, a, .user-capsule, .window-controls, .nav-tabs-group, .nav-tab-pill')) return;
       postWinAction('drag');
     });
     topNav.addEventListener('dblclick', (e) => {
-      if (e.target.closest('button, select, input, textarea, a, .user-capsule, .window-controls')) return;
+      if (e.target.closest('button, select, input, textarea, a, .user-capsule, .window-controls, .nav-tabs-group, .nav-tab-pill')) return;
       postWinAction('maximize');
     });
   }
@@ -829,7 +829,8 @@ function renderTopNavTabs() {
   g_topTabProjectIds.forEach(id => {
     const p = g_projects.find(x => x.id === id);
     if (!p) return;
-    const pill = document.createElement('div');
+    const pill = document.createElement('button');
+    pill.type = 'button';
     pill.className = 'nav-tab-pill' + (p.id === g_currentProjectId ? ' active' : '');
     pill.dataset.id = p.id;
     pill.title = p.name;
@@ -837,7 +838,18 @@ function renderTopNavTabs() {
       <span class="nav-tab-icon">📁</span>
       <span class="nav-tab-title">${escapeHtml(p.name)}</span>
     `;
-    pill.onclick = () => selectProject(p.id);
+    pill.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      if (g_currentProjectId !== p.id) {
+        selectProject(p.id);
+      }
+    });
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (g_currentProjectId !== p.id) {
+        selectProject(p.id);
+      }
+    });
     container.appendChild(pill);
   });
 }
@@ -878,6 +890,7 @@ async function deleteProject(projectId, projectName) {
 }
 
 async function selectProject(projId) {
+  if (!projId) return;
   g_currentProjectId = projId;
   localStorage.setItem('app_current_project', projId);
 
@@ -903,8 +916,17 @@ async function selectProject(projId) {
     el.classList.toggle('active', el.dataset.id === projId);
   });
 
-  await loadMembers();
-  await loadItems();
+  try {
+    await loadMembers();
+  } catch (e) {
+    console.error('loadMembers error:', e);
+  }
+
+  try {
+    await loadItems();
+  } catch (e) {
+    console.error('loadItems error:', e);
+  }
 }
 
 async function loadMembers() {
