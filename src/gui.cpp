@@ -344,7 +344,7 @@ extern "C" int gui_window_create_and_run(int http_port) {
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hIcon = hIconBig;
     wc.hIconSm = hIconSm;
-    wc.hbrBackground = CreateSolidBrush(RGB(15, 23, 42));
+    wc.hbrBackground = CreateSolidBrush(RGB(18, 18, 22));
     wc.lpszClassName = L"ScheduleWorklogWindow";
 
     RegisterClassExW(&wc);

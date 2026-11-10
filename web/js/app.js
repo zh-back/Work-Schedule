@@ -20,39 +20,53 @@ function initEventListeners() {
     }
   };
 
-  // 侧边栏折叠/展开逻辑（默认隐藏）
+  // 侧边栏折叠/展开逻辑 (Activity Bar 联动)
   const setSidebarCollapsed = (collapsed) => {
-    const mainBody = document.getElementById('mainBody');
-    const toggleArrow = document.getElementById('sidebarToggleArrow');
-    const dockPolyline = document.getElementById('dockArrowPolyline');
-    const dockBtn = document.getElementById('sidebarDockToggle');
+    const sidebar = document.getElementById('appSidebar');
+    const actBtnProj = document.getElementById('actBtnProjects');
+    const toggleSvg = document.getElementById('sidebarToggleSvg');
 
-    if (mainBody) {
-      mainBody.classList.toggle('sidebar-collapsed', collapsed);
+    if (sidebar) {
+      sidebar.classList.toggle('collapsed', collapsed);
     }
-    if (toggleArrow) {
-      toggleArrow.innerText = collapsed ? '›' : '‹';
+    if (actBtnProj) {
+      actBtnProj.classList.toggle('active', !collapsed);
     }
-    if (dockPolyline) {
-      dockPolyline.setAttribute('points', collapsed ? '9 18 15 12 9 6' : '15 18 9 12 15 6');
-    }
-    if (dockBtn) {
-      dockBtn.title = collapsed ? '展开左侧项目与报表 (点击展开)' : '收起侧边栏';
+    if (toggleSvg) {
+      toggleSvg.innerHTML = collapsed 
+        ? '<polyline points="9 18 15 12 9 6"></polyline>' 
+        : '<polyline points="15 18 9 12 15 6"></polyline>';
     }
     localStorage.setItem('sidebar_collapsed', collapsed ? 'true' : 'false');
   };
 
   const toggleSidebar = () => {
-    const mainBody = document.getElementById('mainBody');
-    const isCollapsed = mainBody ? mainBody.classList.contains('sidebar-collapsed') : false;
+    const sidebar = document.getElementById('appSidebar');
+    const isCollapsed = sidebar ? sidebar.classList.contains('collapsed') : true;
     setSidebarCollapsed(!isCollapsed);
   };
 
-  const btnTopNav = document.getElementById('btnToggleSidebar');
-  if (btnTopNav) btnTopNav.addEventListener('click', toggleSidebar);
+  const actBtnWorkspace = document.getElementById('actBtnWorkspace');
+  if (actBtnWorkspace) {
+    actBtnWorkspace.addEventListener('click', () => {
+      document.querySelectorAll('.activity-icon-btn').forEach(b => b.classList.remove('active'));
+      actBtnWorkspace.classList.add('active');
+      setSidebarCollapsed(true);
+    });
+  }
 
-  const btnDock = document.getElementById('sidebarDockToggle');
-  if (btnDock) btnDock.addEventListener('click', toggleSidebar);
+  const actBtnProjects = document.getElementById('actBtnProjects');
+  if (actBtnProjects) actBtnProjects.addEventListener('click', toggleSidebar);
+
+  const actBtnToggleSidebar = document.getElementById('actBtnToggleSidebar');
+  if (actBtnToggleSidebar) actBtnToggleSidebar.addEventListener('click', toggleSidebar);
+
+  const actBtnSummary = document.getElementById('actBtnSummary');
+  if (actBtnSummary) {
+    actBtnSummary.addEventListener('click', () => {
+      openSummary('personal');
+    });
+  }
 
   // 初始化侧边栏状态（默认折叠）
   const savedSidebar = localStorage.getItem('sidebar_collapsed');
@@ -349,6 +363,8 @@ async function selectProject(projId) {
   if (p) {
     document.getElementById('currentProjectTitle').innerText = p.name;
     document.getElementById('currentProjectDesc').innerText = p.description || '项目协同工作区';
+    const navTabName = document.getElementById('navTabProjectName');
+    if (navTabName) navTabName.innerText = p.name;
   }
 
   document.querySelectorAll('.project-item').forEach(el => {

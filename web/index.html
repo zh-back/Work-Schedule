@@ -9,42 +9,96 @@
 </head>
 <body>
   <div class="app-layout">
-    <!-- 顶部应用标题栏 -->
+    <!-- 顶部应用标题栏 (Apifox 官方深色原生设计) -->
     <header class="top-nav">
-      <div class="brand">
-        <button id="btnToggleSidebar" class="topnav-sidebar-btn" title="展开/收起左侧项目与报表菜单">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="9" y1="3" x2="9" y2="21"></line>
-          </svg>
-          <span id="sidebarToggleArrow" class="sidebar-toggle-arrow">›</span>
-        </button>
-        <div class="brand-icon">⚡</div>
-        <span class="brand-title">Schedule & WorkLog</span>
-        <span class="brand-badge">C-Engine Native</span>
+      <div class="top-nav-left">
+        <div class="brand">
+          <div class="brand-icon-wrap">
+            <svg class="brand-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#brandGrad)" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <defs>
+                <linearGradient id="brandGrad" x1="3" y1="2" x2="21" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#fef08a"/>
+                  <stop offset="0.5" stop-color="#f59e0b"/>
+                  <stop offset="1" stop-color="#ea580c"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="brand-title">Schedule & WorkLog</span>
+        </div>
+
+        <!-- Apifox 风格工作区/项目 Tab 药丸标签 -->
+        <div class="nav-tabs-group">
+          <div class="nav-tab-pill active" id="currentProjectTab">
+            <span class="nav-tab-icon">📁</span>
+            <span id="navTabProjectName">个人工作</span>
+          </div>
+        </div>
       </div>
-      <div class="user-switch-bar">
-        <span class="user-label">当前身份:</span>
-        <select id="userSelector" class="user-select"></select>
-        <button id="addMemberBtn" class="btn-subtle" title="添加新成员">+ 成员</button>
-      </div>
-      <div class="window-controls">
-        <button id="btnWinMin" class="win-btn" title="最小化">─</button>
-        <button id="btnWinMax" class="win-btn" title="最大化/还原">□</button>
-        <button id="btnWinClose" class="win-btn win-btn-close" title="最小化到托盘">✕</button>
+
+      <div class="top-nav-right">
+        <!-- Apifox 风格身份选择胶囊 (参考正式环境胶囊) -->
+        <div class="user-capsule-wrap">
+          <div class="user-capsule">
+            <span class="capsule-badge">👤</span>
+            <select id="userSelector" class="user-capsule-select"></select>
+            <span class="capsule-arrow">▾</span>
+          </div>
+          <button id="addMemberBtn" class="btn-top-subtle" title="添加新成员">+ 成员</button>
+        </div>
+
+        <!-- Windows 原生无边框控制三键 (─, □, ✕) -->
+        <div class="window-controls">
+          <button id="btnWinMin" class="win-btn" title="最小化">
+            <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor"/></svg>
+          </button>
+          <button id="btnWinMax" class="win-btn" title="最大化/还原">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg>
+          </button>
+          <button id="btnWinClose" class="win-btn win-btn-close" title="收起至托盘">
+            <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+          </button>
+        </div>
       </div>
     </header>
 
-    <div class="main-body sidebar-collapsed" id="mainBody">
-      <!-- 边缘抽拉吸附箭头按钮 -->
-      <button id="sidebarDockToggle" class="sidebar-dock-toggle" title="展开/收起项目侧边栏">
-        <svg id="dockArrowIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline id="dockArrowPolyline" points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
+    <div class="main-body" id="mainBody">
+      <!-- Apifox 极窄图标导航列 (Activity Bar 宽度 52px) -->
+      <nav class="activity-bar">
+        <div class="activity-top">
+          <button class="activity-icon-btn active" id="actBtnWorkspace" title="事项工作台">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span class="activity-label">工作台</span>
+          </button>
+          <button class="activity-icon-btn" id="actBtnProjects" title="展开/收起项目列表">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="activity-label">项目库</span>
+          </button>
+          <button class="activity-icon-btn" id="actBtnSummary" title="查看周报与总结">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span class="activity-label">周报</span>
+          </button>
+        </div>
+        <div class="activity-bottom">
+          <button class="activity-icon-btn" id="actBtnToggleSidebar" title="展开/收起侧边面板">
+            <svg id="sidebarToggleSvg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </nav>
 
-      <!-- 左侧项目导航栏 -->
-      <aside class="sidebar" id="appSidebar">
+      <!-- 左侧抽屉二级项目管理侧栏 (默认折叠) -->
+      <aside class="sidebar-drawer collapsed" id="appSidebar">
         <div class="sidebar-section">
           <div class="sidebar-header">
             <span>我的项目 (PROJECTS)</span>
@@ -62,7 +116,7 @@
 
         <div class="sidebar-section views-section">
           <div class="sidebar-header">
-            <span>报表与总结</span>
+            <span>智能聚合周报</span>
           </div>
           <button id="openPersonalSummaryBtn" class="view-btn">📊 个人全项目周报</button>
           <button id="openProjectSummaryBtn" class="view-btn">👥 本项目全员周报</button>
@@ -71,20 +125,27 @@
 
       <!-- 右侧工作台主体 -->
       <main class="content-area">
-        <!-- 顶部快速录入条 -->
+        <!-- 仿 Apifox 请求栏的一体化快速录入卡片 -->
         <div class="quick-input-card">
-          <div class="input-row">
+          <div class="input-row-apifox">
+            <div class="input-method-badge">
+              <span class="badge-dot"></span>
+              <span class="badge-text">TODO</span>
+            </div>
             <input type="text" id="taskInput" class="task-text-input" placeholder="输入待办事项或计划要做的工作... (支持 #标签)" autocomplete="off">
-            <button id="btnCreateTodo" class="btn btn-primary">+ 加入待办</button>
+            <button id="btnCreateTodo" class="btn btn-apifox-primary">
+              <span class="btn-icon-plus">+</span>
+              <span>加入待办</span>
+            </button>
           </div>
           <div class="quick-tips-bar">
             <div class="quick-tips">
-              <span>快捷标签：</span>
-              <div class="tag-shortcuts" style="display:inline-flex; gap:6px; margin-left:2px;">
-                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#需求开发">#需求开发</span>
-                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#Bug修复">#Bug修复</span>
-                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#方案评审">#方案评审</span>
-                <span class="shortcut-tag" style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:11px; transition:all 0.15s;" data-tag="#性能优化">#性能优化</span>
+              <span class="tips-label">快捷标签：</span>
+              <div class="tag-shortcuts">
+                <span class="shortcut-tag" data-tag="#需求开发">#需求开发</span>
+                <span class="shortcut-tag" data-tag="#Bug修复">#Bug修复</span>
+                <span class="shortcut-tag" data-tag="#方案评审">#方案评审</span>
+                <span class="shortcut-tag" data-tag="#性能优化">#性能优化</span>
               </div>
             </div>
             <button type="button" id="visibilityToggleBtn" class="visibility-subtle-toggle" title="点击切换：公开 / 仅自己可见">
@@ -97,7 +158,10 @@
         <!-- 当前活动项目标题与视图切换 -->
         <div class="workspace-header">
           <div>
-            <h2 id="currentProjectTitle">个人工作</h2>
+            <div class="project-heading-row">
+              <h2 id="currentProjectTitle">个人工作</h2>
+              <span class="project-status-dot"></span>
+            </div>
             <p id="currentProjectDesc" class="project-subtitle">默认个人空间，用于记录个人独立日常事务</p>
           </div>
           <div class="stats-pills">
@@ -109,10 +173,13 @@
         <!-- 双栏待办与已完成流水 -->
         <div class="columns-grid">
           <!-- 左栏：待办列表 -->
-          <div class="panel">
+          <div class="panel panel-todo">
             <div class="panel-header">
-              <h3>📋 待办事项 (To-Do)</h3>
-              <span class="panel-tip">做完打勾自动完成</span>
+              <div class="panel-header-title">
+                <span class="panel-tag-badge todo-tag">待办</span>
+                <h3>待办事项 (To-Do)</h3>
+              </div>
+              <span class="panel-tip">做完打勾自动归档</span>
             </div>
             <div id="todoListContainer" class="items-list">
               <div class="empty-state">暂无待办事项，输入上方事项添加</div>
@@ -122,8 +189,9 @@
           <!-- 右栏：已完成时间轴与历史日期回溯 -->
           <div class="panel panel-done">
             <div class="panel-header">
-              <div class="panel-title-wrap">
-                <h3 id="donePanelTitle">✅ 今日已完成</h3>
+              <div class="panel-header-title">
+                <span class="panel-tag-badge done-tag">完成</span>
+                <h3 id="donePanelTitle">今日已完成</h3>
               </div>
               <div class="date-navigator">
                 <button class="date-step-btn" id="prevDayBtn" title="前一天">
@@ -172,7 +240,7 @@
       </div>
       <div class="modal-footer">
         <span id="copyTip" class="copy-success-tip hidden">已复制到剪贴板！</span>
-        <button id="copySummaryBtn" class="btn btn-primary">📋 一键复制 Markdown 周报</button>
+        <button id="copySummaryBtn" class="btn btn-apifox-primary">📋 一键复制 Markdown 周报</button>
       </div>
     </div>
   </div>

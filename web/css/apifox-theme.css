@@ -1,20 +1,40 @@
+/* ==========================================================================
+   Apifox Dark UI Design System - Schedule & WorkLog
+   ========================================================================== */
+
 :root {
-  --bg-primary: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-sidebar: #ffffff;
-  --border-color: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
-  --success-color: #10b981;
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
-  --tag-bg: #e0f2fe;
-  --tag-color: #0369a1;
-  --priv-bg: #fef2f2;
-  --priv-color: #b91c1c;
+  --bg-app: #121216;
+  --bg-header: #18181d;
+  --bg-activity: #141418;
+  --bg-sidebar: #191920;
+  --bg-content: #15151a;
+  --bg-panel: #1b1b22;
+  --bg-card: #22222b;
+  --bg-card-hover: #292934;
+  --bg-input: #1f1f27;
+  
+  --border-app: #282834;
+  --border-subtle: #272732;
+  --border-card: #2c2c38;
+  --border-hover: #404052;
+  --border-focus: #7c3aed;
+
+  --text-white: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #848da0;
+  --text-light: #525a6c;
+
+  --apifox-purple: #7c3aed;
+  --apifox-purple-hover: #6d28d9;
+  --apifox-purple-gradient: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  
+  --apifox-green: #10b981;
+  --apifox-green-bg: rgba(16, 185, 129, 0.12);
+  --apifox-green-border: rgba(16, 185, 129, 0.28);
+
+  --apifox-amber: #f59e0b;
+  --apifox-amber-bg: rgba(245, 158, 11, 0.12);
+  --apifox-amber-border: rgba(245, 158, 11, 0.28);
 }
 
 * {
@@ -24,215 +44,286 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-body);
   height: 100vh;
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* 整个客户端顶层外边框 (高贵 1px 微光描边) */
 .app-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background: var(--bg-app);
+  border: 1px solid var(--border-app);
+  overflow: hidden;
 }
 
-/* 顶部导航栏 (Apifox Header 风格) */
+/* ==========================================================================
+   顶部标题栏 (Apifox 官方标志性 Header)
+   ========================================================================== */
 .top-nav {
-  height: 48px;
+  height: 44px;
   flex-shrink: 0;
-  background: #0f172a;
-  color: #fff;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid #1e293b;
+  padding: 0 0 0 12px;
   user-select: none;
   cursor: default;
+}
+
+.top-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.topnav-sidebar-btn {
-  display: inline-flex;
+.brand-icon-wrap {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #cbd5e1;
-  padding: 4px 8px;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   border-radius: 5px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  line-height: 1;
-}
-
-.topnav-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-.sidebar-toggle-arrow {
-  font-size: 13px;
-  font-weight: 700;
-  color: #94a3b8;
-  transition: transform 0.2s ease;
-}
-
-.topnav-sidebar-btn:hover .sidebar-toggle-arrow {
-  color: #ffffff;
-}
-
-.brand-icon {
-  font-size: 18px;
+  background: rgba(245, 158, 11, 0.15);
 }
 
 .brand-title {
+  font-size: 13px;
   font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.5px;
+  color: var(--text-white);
+  letter-spacing: 0.3px;
 }
 
-.brand-badge {
-  font-size: 11px;
-  background: #334155;
-  color: #94a3b8;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.user-switch-bar {
+/* Apifox 风格 Tab 标签页 */
+.nav-tabs-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  margin-left: auto;
-  margin-right: 16px;
+  gap: 6px;
+  height: 100%;
 }
 
-.window-controls {
+.nav-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #23232c;
+  border: 1px solid #30303e;
+  border-radius: 6px;
+  padding: 3.5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-white);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-tab-pill:hover {
+  background: #2a2a36;
+  border-color: #3e3e4e;
+}
+
+.top-nav-right {
   display: flex;
   align-items: center;
   height: 100%;
-  margin-right: -16px;
+}
+
+/* Apifox 身份切换胶囊 (仿照 "正 正式环境 ▾") */
+.user-capsule-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.user-capsule {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #212129;
+  border: 1px solid #30303e;
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.user-capsule:hover {
+  border-color: #444456;
+}
+
+.capsule-badge {
+  font-size: 11px;
+}
+
+.user-capsule-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-size: 12px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  padding-right: 14px;
+  font-family: inherit;
+}
+
+.user-capsule-select option {
+  background: #212129;
+  color: #fff;
+}
+
+.capsule-arrow {
+  position: absolute;
+  right: 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.btn-top-subtle {
+  background: transparent;
+  border: 1px dashed #3a3a4c;
+  color: #94a3b8;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-top-subtle:hover {
+  border-color: var(--apifox-purple);
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+/* Windows 窗口控制三键 */
+.window-controls {
+  display: flex;
+  height: 100%;
 }
 
 .win-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #848da0;
   width: 44px;
-  height: 48px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
   cursor: pointer;
   transition: all 0.15s ease;
   outline: none;
 }
 
 .win-btn:hover {
-  background: #1e293b;
+  background: #282834;
   color: #f8fafc;
 }
 
 .win-btn-close:hover {
-  background: #dc2626 !important;
+  background: #e11d48 !important;
   color: #ffffff !important;
 }
 
-.user-label {
-  color: #94a3b8;
-}
-
-.user-select {
-  background: #1e293b;
-  color: #f8fafc;
-  border: 1px solid #334155;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  outline: none;
-}
-
-.btn-subtle {
-  background: transparent;
-  border: 1px dashed #475569;
-  color: #cbd5e1;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-subtle:hover {
-  background: #334155;
-  color: #fff;
-}
-
-/* 主体内容与侧边栏 */
+/* ==========================================================================
+   主体容器 (Activity Bar + Drawer + Content)
+   ========================================================================== */
 .main-body {
   position: relative;
   display: flex;
   flex: 1;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 44px);
   min-height: 0;
   overflow: hidden;
+  background: var(--bg-content);
 }
 
-/* 侧边吸附抽拉箭头按钮 (支持点击展开/折叠) */
-.sidebar-dock-toggle {
-  position: absolute;
-  top: 14px;
-  left: 200px;
-  z-index: 50;
-  width: 20px;
-  height: 38px;
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-left: 1px solid var(--border-color);
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+/* Apifox 极窄图标导航列 (Activity Bar) */
+.activity-bar {
+  width: 52px;
+  min-width: 52px;
+  background: var(--bg-activity);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.activity-top, .activity-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.activity-icon-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
   cursor: pointer;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
-  color: #64748b;
-  transition: left 0.24s cubic-bezier(0.4, 0, 0.2, 1),
-              background 0.15s ease,
-              color 0.15s ease,
-              width 0.15s ease;
-  padding: 0;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
+  padding: 0;
 }
 
-.sidebar-dock-toggle:hover {
-  background: #eff6ff;
-  color: var(--primary-color);
-  width: 23px;
+.activity-icon-btn:hover {
+  color: var(--text-white);
+  background: #202028;
 }
 
-.main-body.sidebar-collapsed .sidebar-dock-toggle {
-  left: 0;
-  border-left: none;
+.activity-icon-btn.active {
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.18);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.25);
 }
 
-.sidebar {
-  width: 200px;
-  min-width: 200px;
+.activity-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  line-height: 1;
+}
+
+/* 抽屉二级侧栏 */
+.sidebar-drawer {
+  width: 210px;
+  min-width: 210px;
   background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-subtle);
   padding: 14px 10px;
   display: flex;
   flex-direction: column;
@@ -241,13 +332,13 @@ body {
   overflow-x: hidden;
   flex-shrink: 0;
   white-space: nowrap;
-  transition: width 0.24s cubic-bezier(0.4, 0, 0.2, 1),
-              min-width 0.24s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.22s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.18s ease;
 }
 
-.main-body.sidebar-collapsed .sidebar {
+.sidebar-drawer.collapsed {
   width: 0 !important;
   min-width: 0 !important;
   padding: 0 !important;
@@ -277,10 +368,11 @@ body {
   cursor: pointer;
   padding: 0 4px;
   line-height: 1;
+  transition: color 0.15s;
 }
 
 .btn-icon:hover {
-  color: var(--primary-color);
+  color: var(--apifox-purple);
 }
 
 .project-menu, .member-menu {
@@ -291,31 +383,33 @@ body {
 }
 
 .project-item {
-  padding: 8px 10px;
+  padding: 7px 10px;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
-  color: #334155;
+  font-size: 12.5px;
+  color: var(--text-body);
   transition: all 0.15s ease;
 }
 
 .project-item:hover {
-  background: #f1f5f9;
+  background: #24242e;
+  color: #fff;
 }
 
 .project-item.active {
-  background: #eff6ff;
-  color: var(--primary-color);
+  background: rgba(124, 58, 237, 0.16);
+  color: #c4b5fd;
   font-weight: 600;
+  border-left: 2px solid var(--apifox-purple);
 }
 
 .member-item {
-  padding: 6px 10px;
+  padding: 5px 10px;
   font-size: 12px;
-  color: #475569;
+  color: var(--text-muted);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -324,7 +418,7 @@ body {
 .member-role {
   font-size: 10px;
   color: var(--text-light);
-  background: #f1f5f9;
+  background: #23232c;
   padding: 1px 5px;
   border-radius: 4px;
 }
@@ -337,88 +431,140 @@ body {
 }
 
 .view-btn {
-  background: #f8fafc;
-  border: 1px solid var(--border-color);
+  background: #21212a;
+  border: 1px solid var(--border-subtle);
   padding: 8px 10px;
   border-radius: 6px;
   text-align: left;
   font-size: 12px;
-  color: #334155;
+  color: var(--text-body);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 
 .view-btn:hover {
-  background: #eff6ff;
-  color: var(--primary-color);
-  border-color: #bfdbfe;
+  background: #292934;
+  color: #fff;
+  border-color: #3f3f50;
 }
 
-/* 工作台区域 */
+/* ==========================================================================
+   工作台主内容区
+   ========================================================================== */
 .content-area {
   flex: 1;
-  padding: 14px 20px;
+  padding: 14px 18px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
   min-height: 0;
+  background: var(--bg-content);
 }
 
+/* 仿 Apifox 请求栏的一体化录入卡片 */
 .quick-input-card {
-  background: #ffffff;
-  border: 1px solid var(--border-color);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 10px 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
 }
 
-.input-row {
+.input-row-apifox {
   display: flex;
-  gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: 7px;
+  padding: 2px 3px 2px 8px;
+  transition: all 0.18s ease;
+}
+
+.input-row-apifox:focus-within {
+  border-color: var(--apifox-purple);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.22);
+}
+
+.input-method-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid var(--apifox-amber-border);
+  padding: 3px 8px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--apifox-amber);
+}
+
+.badge-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--apifox-amber);
+  letter-spacing: 0.5px;
 }
 
 .task-text-input {
-  flex: 1 1 180px;
+  flex: 1;
   min-width: 0;
-  padding: 8px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.task-text-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
-}
-
-.btn {
-  flex-shrink: 0;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
+  background: transparent;
   border: none;
-  transition: all 0.15s;
-  white-space: nowrap;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-white);
+  outline: none;
+  font-family: inherit;
 }
 
-.btn-primary {
-  background: var(--primary-color);
-  color: #fff;
+.task-text-input::placeholder {
+  color: #636b7d;
 }
 
-.btn-primary:hover {
-  background: var(--primary-hover);
+/* Apifox 标志性电光紫主按钮 */
+.btn-apifox-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--apifox-purple-gradient);
+  color: #ffffff;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+  user-select: none;
 }
 
+.btn-apifox-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45);
+}
+
+.btn-apifox-primary:active {
+  transform: translateY(0.5px);
+}
+
+.btn-icon-plus {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 快捷标签与私密可见性工具行 */
 .quick-tips-bar {
   margin-top: 8px;
   display: flex;
@@ -429,19 +575,46 @@ body {
 }
 
 .quick-tips {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--text-muted);
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.tips-label {
+  color: #636b7d;
+}
+
+.tag-shortcuts {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.shortcut-tag {
+  background: #262632;
+  color: #a1a9b8;
+  border: 1px solid #333342;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.15s ease;
+}
+
+.shortcut-tag:hover {
+  background: rgba(124, 58, 237, 0.16) !important;
+  color: #c4b5fd !important;
+  border-color: var(--apifox-purple);
 }
 
 .visibility-subtle-toggle {
-  background: transparent;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  padding: 2px 8px;
+  background: #23232c;
+  border: 1px solid #323240;
+  border-radius: 5px;
+  padding: 2.5px 9px;
   font-size: 11px;
-  color: #64748b;
+  color: #94a3b8;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -452,39 +625,53 @@ body {
 }
 
 .visibility-subtle-toggle:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-  border-color: #cbd5e1;
+  background: #2a2a36;
+  color: #fff;
+  border-color: #444456;
 }
 
 .visibility-subtle-toggle.is-private {
-  background: #fff7ed;
-  color: #c2410c;
-  border-color: #fed7aa;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
   font-weight: 600;
 }
 
-.shortcut-tag:hover {
-  background: #e0f2fe !important;
-  color: #0369a1 !important;
-}
-
+/* ==========================================================================
+   活动项目标题栏
+   ========================================================================== */
 .workspace-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   flex-shrink: 0;
+  padding: 2px 2px 0 2px;
 }
 
-.workspace-header h2 {
+.project-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-heading-row h2 {
   font-size: 16px;
   font-weight: 700;
+  color: var(--text-white);
+}
+
+.project-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--apifox-green);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
 }
 
 .project-subtitle {
   font-size: 12px;
   color: var(--text-muted);
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .stats-pills {
@@ -494,22 +681,26 @@ body {
 
 .pill {
   font-size: 11px;
-  padding: 3px 8px;
+  padding: 3px 10px;
   border-radius: 12px;
   font-weight: 600;
 }
 
 .pill-todo {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--apifox-amber-bg);
+  color: var(--apifox-amber);
+  border: 1px solid var(--apifox-amber-border);
 }
 
 .pill-done {
-  background: var(--success-bg);
-  color: var(--success-color);
+  background: var(--apifox-green-bg);
+  color: var(--apifox-green);
+  border: 1px solid var(--apifox-green-border);
 }
 
-/* 双栏面板 */
+/* ==========================================================================
+   双栏面板系统 (待办 vs 完成)
+   ========================================================================== */
 .columns-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -520,30 +711,58 @@ body {
 }
 
 .panel {
-  background: #fff;
-  border: 1px solid var(--border-color);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   min-height: 0;
   height: 100%;
 }
 
 .panel-header {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fafafa;
+  background: #17171e;
   flex-shrink: 0;
+  min-height: 42px;
 }
 
-.panel-header h3 {
-  font-size: 13px;
+.panel-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-header-title h3 {
+  font-size: 12.5px;
   font-weight: 600;
+  color: var(--text-white);
+}
+
+.panel-tag-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.todo-tag {
+  background: var(--apifox-amber-bg);
+  color: var(--apifox-amber);
+  border: 1px solid var(--apifox-amber-border);
+}
+
+.done-tag {
+  background: var(--apifox-green-bg);
+  color: var(--apifox-green);
+  border: 1px solid var(--apifox-green-border);
 }
 
 .panel-tip {
@@ -551,7 +770,9 @@ body {
   color: var(--text-light);
 }
 
-/* 现代精致日期导航条 */
+/* ==========================================================================
+   Apifox 风格暗黑日期选择条 (Segmented Tabs)
+   ========================================================================== */
 .date-navigator {
   display: inline-flex;
   align-items: center;
@@ -565,34 +786,27 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 5px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #64748b;
+  border: 1px solid #2e2e3c;
+  background: #21212a;
+  color: #94a3b8;
   cursor: pointer;
   padding: 0;
   transition: all 0.15s ease;
 }
 
 .date-step-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
-  transform: translateY(-0.5px);
+  background: #2b2b36;
+  color: #ffffff;
+  border-color: #424254;
 }
 
-.date-step-btn:active {
-  transform: translateY(0.5px);
-  background: #f1f5f9;
-}
-
-/* 苹果/Linear式分段切换器 (Segmented Control) */
 .segmented-control {
   display: inline-flex;
   align-items: center;
-  background: #f1f5f9;
+  background: #23232c;
   padding: 2px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #30303e;
 }
 
 .seg-btn {
@@ -600,28 +814,27 @@ body {
   border: none;
   font-size: 11.5px;
   font-weight: 500;
-  color: #64748b;
+  color: #94a3b8;
   padding: 2px 9px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease;
   line-height: 18px;
   outline: none;
   user-select: none;
 }
 
 .seg-btn:hover {
-  color: #1e293b;
+  color: #ffffff;
 }
 
 .seg-btn.active {
-  background: #ffffff;
-  color: var(--primary-color);
+  background: #363646;
+  color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-/* 日历胶囊按钮与弹出层 */
 .calendar-picker-wrapper {
   position: relative;
   display: inline-flex;
@@ -632,34 +845,29 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #23232c;
+  border: 1px solid #30303e;
   padding: 2.5px 8px;
   border-radius: 6px;
   font-size: 11.5px;
   font-weight: 500;
-  color: #475569;
+  color: #94a3b8;
   cursor: pointer;
   transition: all 0.15s ease;
   line-height: 18px;
 }
 
 .calendar-pill-btn:hover {
-  border-color: #94a3b8;
-  color: #0f172a;
-  background: #f8fafc;
+  border-color: #444456;
+  color: #ffffff;
+  background: #2a2a36;
 }
 
 .calendar-pill-btn.active {
-  background: #eff6ff;
-  border-color: #60a5fa;
-  color: var(--primary-color);
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: var(--apifox-green);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
-}
-
-.calendar-icon {
-  stroke: currentColor;
 }
 
 .hidden-native-date {
@@ -673,65 +881,69 @@ body {
   border: none;
 }
 
-.panel-done {
-  background: #fafdfb;
-}
-
-.panel-done .panel-header {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-}
-
-.panel-done .panel-header h3 {
-  color: #166534;
-}
-
+/* ==========================================================================
+   事项列表与卡片 (Item Cards)
+   ========================================================================== */
 .items-list {
   padding: 10px;
   overflow-y: auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
-  min-height: 0;
 }
 
 .empty-state {
-  text-align: center;
-  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  font-size: 12px;
   color: var(--text-light);
-  font-size: 13px;
+  border: 1px dashed #2c2c3a;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.01);
 }
 
 .item-card {
-  background: #fff;
-  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
   border-radius: 6px;
   padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
+  position: relative;
 }
 
 .item-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .item-checkbox {
   width: 16px;
   height: 16px;
   cursor: pointer;
+  accent-color: var(--apifox-purple);
 }
 
 .item-content {
   flex: 1;
   font-size: 13px;
-  color: #1e293b;
+  color: var(--text-white);
   line-height: 1.4;
-  word-break: break-word;
-  min-width: 0;
+  word-break: break-all;
+}
+
+.item-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: Consolas, monospace;
+  white-space: nowrap;
 }
 
 .item-meta {
@@ -741,64 +953,62 @@ body {
   flex-shrink: 0;
 }
 
+.badge-tag {
+  font-size: 10.5px;
+  background: rgba(124, 58, 237, 0.16);
+  color: #c4b5fd;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.badge-priv {
+  font-size: 10px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
 .btn-icon-delete {
   background: transparent;
   border: none;
-  font-size: 13px;
   cursor: pointer;
-  padding: 3px 6px;
-  border-radius: 4px;
+  font-size: 13px;
   opacity: 0.2;
-  transition: all 0.15s ease;
-  color: #ef4444;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  transition: opacity 0.15s, transform 0.15s;
+  padding: 2px 4px;
+  line-height: 1;
+  color: #94a3b8;
 }
 
 .item-card:hover .btn-icon-delete {
-  opacity: 0.75;
+  opacity: 0.7;
 }
 
 .btn-icon-delete:hover {
   opacity: 1 !important;
-  background: #fee2e2;
-  transform: scale(1.1);
+  transform: scale(1.15);
+  color: #f87171;
 }
 
-.badge-tag {
-  background: var(--tag-bg);
-  color: var(--tag-color);
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 10px;
-}
-
-.badge-priv {
-  background: var(--priv-bg);
-  color: var(--priv-color);
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 10px;
-}
-
-.item-time {
-  font-family: monospace;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* Modal */
+/* ==========================================================================
+   周报弹窗 Modal (深色磨砂质感)
+   ========================================================================== */
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(2px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  transition: opacity 0.2s;
 }
 
 .modal-overlay.hidden {
@@ -806,65 +1016,100 @@ body {
 }
 
 .modal-box {
-  background: #fff;
+  background: #1c1c24;
+  border: 1px solid #323242;
+  border-radius: 10px;
   width: 680px;
   max-width: 90vw;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 14px 18px;
+  border-bottom: 1px solid #2d2d3a;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-white);
 }
 
 .close-btn {
   background: transparent;
   border: none;
+  color: #848da0;
   font-size: 20px;
   cursor: pointer;
-  color: var(--text-muted);
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.close-btn:hover {
+  color: #ffffff;
 }
 
 .modal-body {
-  padding: 16px 20px;
+  padding: 16px 18px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .summary-textarea {
   width: 100%;
-  height: 340px;
-  padding: 12px;
-  font-family: Consolas, Monaco, "Courier New", monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  border: 1px solid #cbd5e1;
+  height: 380px;
+  background: #141418;
+  border: 1px solid #2d2d3a;
   border-radius: 6px;
-  background: #f8fafc;
-  outline: none;
+  padding: 12px;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  color: #e2e8f0;
   resize: none;
+  outline: none;
+  line-height: 1.6;
 }
 
 .modal-footer {
-  padding: 12px 20px;
-  border-top: 1px solid var(--border-color);
+  padding: 12px 18px;
+  border-top: 1px solid #2d2d3a;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  background: #fafafa;
+  gap: 12px;
 }
 
 .copy-success-tip {
-  color: var(--success-color);
   font-size: 12px;
-  font-weight: 500;
+  color: var(--apifox-green);
+  font-weight: 600;
 }
 
 .copy-success-tip.hidden {
   display: none;
+}
+
+/* 自定义暗黑滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30303e;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #424254;
 }
