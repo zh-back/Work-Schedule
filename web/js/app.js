@@ -126,32 +126,145 @@ function initEventListeners() {
     }
   });
 
-  // 日期快速切换按钮事件绑定
-  document.querySelectorAll('.date-filter-btn').forEach(btn => {
+  // 日期快捷分段 (今天 / 昨天 / 全部)
+  document.querySelectorAll('.seg-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.date-filter-btn').forEach(b => b.classList.remove('active'));
-      const picker = document.getElementById('customDatePicker');
-      if (picker) {
-        picker.value = '';
-        picker.classList.remove('active');
-      }
-      btn.classList.add('active');
       g_currentFilterDate = btn.dataset.date;
+      updateDateFilterUI();
       loadItems();
     });
   });
 
-  // 自定义日期选择器事件
-  const customPicker = document.getElementById('customDatePicker');
-  if (customPicker) {
-    customPicker.addEventListener('change', (e) => {
+  // 日历胶囊按钮点击唤起系统日期选择
+  const calTrigger = document.getElementById('calendarTriggerBtn');
+  const nativePicker = document.getElementById('nativeDatePicker');
+  if (calTrigger && nativePicker) {
+    calTrigger.addEventListener('click', (e) => {
+      if (e.target.id === 'clearDateBtn') return;
+      if (typeof nativePicker.showPicker === 'function') {
+        nativePicker.showPicker();
+      } else {
+        nativePicker.click();
+      }
+    });
+
+    nativePicker.addEventListener('change', (e) => {
       const val = e.target.value;
       if (!val) return;
-      document.querySelectorAll('.date-filter-btn').forEach(b => b.classList.remove('active'));
-      customPicker.classList.add('active');
       g_currentFilterDate = val;
+      updateDateFilterUI();
       loadItems();
     });
+  }
+
+  // 清除自选日期，快捷返回“今天”
+  const clearBtn = document.getElementById('clearDateBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      g_currentFilterDate = 'today';
+      updateDateFilterUI();
+      loadItems();
+    });
+  }
+
+  // 前一天步进
+  const prevBtn = document.getElementById('prevDayBtn');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      shiftDate(-1);
+    });
+  }
+
+  // 后一天步进
+  const nextBtn = document.getElementById('nextDayBtn');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      shiftDate(1);
+    });
+  }
+}
+
+function getISODateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function shiftDate(offsetDays) {
+  let baseDate = new Date();
+  if (g_currentFilterDate === 'today') {
+    baseDate = new Date();
+  } else if (g_currentFilterDate === 'yesterday') {
+    baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() - 1);
+  } else if (g_currentFilterDate === 'all') {
+    baseDate = new Date();
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(g_currentFilterDate)) {
+    const parts = g_currentFilterDate.split('-').map(Number);
+    baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  baseDate.setDate(baseDate.getDate() + offsetDays);
+  const targetStr = getISODateStr(baseDate);
+  const todayStr = getISODateStr(new Date());
+  let yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getISODateStr(yesterday);
+
+  if (targetStr === todayStr) {
+    g_currentFilterDate = 'today';
+  } else if (targetStr === yesterdayStr) {
+    g_currentFilterDate = 'yesterday';
+  } else {
+    g_currentFilterDate = targetStr;
+  }
+
+  updateDateFilterUI();
+  loadItems();
+}
+
+function updateDateFilterUI() {
+  const tabs = document.querySelectorAll('.seg-btn');
+  const calBtn = document.getElementById('calendarTriggerBtn');
+  const calText = document.getElementById('calendarDateText');
+  const clearBtn = document.getElementById('clearDateBtn');
+  const nativePicker = document.getElementById('nativeDatePicker');
+
+  const todayStr = getISODateStr(new Date());
+  let yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getISODateStr(yesterday);
+
+  if (g_currentFilterDate === todayStr) g_currentFilterDate = 'today';
+  if (g_currentFilterDate === yesterdayStr) g_currentFilterDate = 'yesterday';
+
+  tabs.forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.date === g_currentFilterDate);
+  });
+
+  if (g_currentFilterDate === 'today') {
+    if (calBtn) calBtn.classList.remove('active');
+    if (calText) calText.innerText = '日历';
+    if (clearBtn) clearBtn.classList.add('hidden');
+    if (nativePicker) nativePicker.value = todayStr;
+  } else if (g_currentFilterDate === 'yesterday') {
+    if (calBtn) calBtn.classList.remove('active');
+    if (calText) calText.innerText = '日历';
+    if (clearBtn) clearBtn.classList.add('hidden');
+    if (nativePicker) nativePicker.value = yesterdayStr;
+  } else if (g_currentFilterDate === 'all') {
+    if (calBtn) calBtn.classList.remove('active');
+    if (calText) calText.innerText = '日历';
+    if (clearBtn) clearBtn.classList.add('hidden');
+    if (nativePicker) nativePicker.value = '';
+  } else {
+    if (calBtn) calBtn.classList.add('active');
+    const parts = g_currentFilterDate.split('-');
+    if (calText) calText.innerText = parts.length === 3 ? `${parts[1]}-${parts[2]}` : g_currentFilterDate;
+    if (clearBtn) clearBtn.classList.remove('hidden');
+    if (nativePicker) nativePicker.value = g_currentFilterDate;
   }
 }
 
@@ -248,21 +361,23 @@ async function loadItems() {
   const doneCount = data.dones ? data.dones.length : 0;
   document.getElementById('todoCountPill').innerText = `待办: ${todoCount}`;
 
+  updateDateFilterUI();
+
   // 动态更新已完成栏标题、统计徽章和空状态提示
-  let doneTitle = '✅ 今日已完成 (Done Timeline)';
+  let doneTitle = '✅ 今日已完成';
   let doneEmptyText = '今天还没有记录已完成的工作';
   let donePillText = `今日完成: ${doneCount}`;
 
   if (g_currentFilterDate === 'today') {
-    doneTitle = '✅ 今日已完成 (Done Timeline)';
+    doneTitle = '✅ 今日已完成';
     doneEmptyText = '今天还没有记录已完成的工作';
     donePillText = `今日完成: ${doneCount}`;
   } else if (g_currentFilterDate === 'yesterday') {
-    doneTitle = '📅 昨天已完成 (Yesterday Done)';
+    doneTitle = '📅 昨天已完成';
     doneEmptyText = '昨天没有记录已完成的工作';
     donePillText = `昨天完成: ${doneCount}`;
   } else if (g_currentFilterDate === 'all') {
-    doneTitle = '📚 全部历史已完成 (All History)';
+    doneTitle = '📚 全部历史已完成';
     doneEmptyText = '暂无已完成的工作记录';
     donePillText = `累计完成: ${doneCount}`;
   } else {
@@ -363,6 +478,9 @@ async function createItem(isDone) {
 
   if (res.ok) {
     input.value = '';
+    if (isDone) {
+      g_currentFilterDate = 'today';
+    }
     await loadItems();
   }
 }
@@ -375,6 +493,7 @@ async function markItemDone(itemId) {
   });
 
   if (res.ok) {
+    g_currentFilterDate = 'today';
     await loadItems();
   }
 }

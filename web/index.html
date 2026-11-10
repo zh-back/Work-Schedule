@@ -105,15 +105,35 @@
 
           <!-- 右栏：已完成时间轴与历史日期回溯 -->
           <div class="panel panel-done">
-            <div class="panel-header" style="flex-wrap: wrap; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <h3 id="donePanelTitle">✅ 今日已完成 (Done Timeline)</h3>
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <h3 id="donePanelTitle">✅ 今日已完成</h3>
               </div>
-              <div class="date-filter-group">
-                <button class="date-filter-btn active" data-date="today">今天</button>
-                <button class="date-filter-btn" data-date="yesterday">昨天</button>
-                <button class="date-filter-btn" data-date="all">全部</button>
-                <input type="date" id="customDatePicker" class="custom-date-picker" title="选择指定日期">
+              <div class="date-navigator">
+                <button class="date-step-btn" id="prevDayBtn" title="前一天">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <div class="segmented-control">
+                  <button class="seg-btn active" data-date="today">今天</button>
+                  <button class="seg-btn" data-date="yesterday">昨天</button>
+                  <button class="seg-btn" data-date="all">全部</button>
+                </div>
+                <button class="date-step-btn" id="nextDayBtn" title="后一天">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <div class="calendar-picker-wrapper">
+                  <button class="calendar-pill-btn" id="calendarTriggerBtn" title="按日历挑选日期">
+                    <svg class="calendar-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span id="calendarDateText">日历</span>
+                    <span id="clearDateBtn" class="clear-date-icon hidden" title="返回今天">&times;</span>
+                  </button>
+                  <input type="date" id="nativeDatePicker" class="hidden-native-date">
+                </div>
               </div>
             </div>
             <div id="doneListContainer" class="items-list">

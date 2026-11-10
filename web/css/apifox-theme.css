@@ -449,58 +449,146 @@ body {
   color: var(--text-light);
 }
 
-.date-filter-group {
+/* 现代精致日期导航条 */
+.date-navigator {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
+}
+
+.date-step-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.date-step-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: translateY(-0.5px);
+}
+
+.date-step-btn:active {
+  transform: translateY(0.5px);
   background: #f1f5f9;
-  padding: 2px 4px;
+}
+
+/* 苹果/Linear式分段切换器 (Segmented Control) */
+.segmented-control {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 2px;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
 }
 
-.date-filter-btn {
+.seg-btn {
   background: transparent;
   border: none;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 500;
   color: #64748b;
-  padding: 2px 7px;
+  padding: 2px 9px;
   border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 18px;
+  outline: none;
+  user-select: none;
+}
+
+.seg-btn:hover {
+  color: #1e293b;
+}
+
+.seg-btn.active {
+  background: #ffffff;
+  color: var(--primary-color);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* 日历胶囊按钮与弹出层 */
+.calendar-picker-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.calendar-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 2.5px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
   line-height: 18px;
 }
 
-.date-filter-btn:hover {
+.calendar-pill-btn:hover {
+  border-color: #94a3b8;
   color: #0f172a;
+  background: #f8fafc;
 }
 
-.date-filter-btn.active {
-  background: #ffffff;
+.calendar-pill-btn.active {
+  background: #eff6ff;
+  border-color: #60a5fa;
   color: var(--primary-color);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
 }
 
-.custom-date-picker {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #334155;
-  padding: 1px 4px;
-  outline: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.15s;
+.calendar-icon {
+  stroke: currentColor;
 }
 
-.custom-date-picker:focus,
-.custom-date-picker.active {
-  border-color: var(--primary-color);
+.clear-date-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #dbeafe;
   color: var(--primary-color);
-  font-weight: 600;
+  margin-left: 2px;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.clear-date-icon:hover {
+  background: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.hidden-native-date {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
 }
 
 .panel-done {
