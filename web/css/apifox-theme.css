@@ -628,6 +628,39 @@ body {
   transition: all 0.15s ease;
 }
 
+.project-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.project-item:hover .project-delete-btn {
+  opacity: 0.6;
+}
+
+.project-delete-btn:hover {
+  opacity: 1 !important;
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12);
+}
+
 .project-item:hover {
   background: var(--bg-subtle-hover);
   color: var(--text-white);
@@ -1970,4 +2003,25 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* 窗口无边框 8 向缩放热区手柄 */
+.window-resize-handle {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: auto;
+  user-select: none;
+}
+.resize-top { top: 0; left: 8px; right: 8px; height: 6px; cursor: n-resize; }
+.resize-bottom { bottom: 0; left: 8px; right: 8px; height: 6px; cursor: s-resize; }
+.resize-left { top: 8px; bottom: 8px; left: 0; width: 6px; cursor: w-resize; }
+.resize-right { top: 8px; bottom: 8px; right: 0; width: 6px; cursor: e-resize; }
+
+.resize-topleft { top: 0; left: 0; width: 10px; height: 10px; cursor: nw-resize; }
+.resize-topright { top: 0; right: 0; width: 10px; height: 10px; cursor: ne-resize; }
+.resize-bottomleft { bottom: 0; left: 0; width: 10px; height: 10px; cursor: sw-resize; }
+.resize-bottomright { bottom: 0; right: 0; width: 10px; height: 10px; cursor: se-resize; }
+
+body.is-maximized .window-resize-handle {
+  display: none !important;
 }

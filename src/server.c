@@ -193,6 +193,20 @@ static void handle_client(SOCKET client) {
         snprintf(resp, sizeof(resp), "{\"success\":%s,\"id\":\"%s\"}", rc == 0 ? "true" : "false", new_id);
         send_http_response(client, rc == 0 ? 200 : 400, "application/json; charset=utf-8", resp);
     }
+    else if ((strcmp(path, "/api/projects/delete") == 0 || (strcmp(path, "/api/projects") == 0 && strcmp(method, "DELETE") == 0)) && (strcmp(method, "POST") == 0 || strcmp(method, "DELETE") == 0)) {
+        char proj_id[UUID_STR_LEN] = {0};
+        get_json_str(body, "id", proj_id, sizeof(proj_id));
+        if (strlen(proj_id) == 0) {
+            get_json_str(body, "project_id", proj_id, sizeof(proj_id));
+        }
+        if (strlen(proj_id) == 0) {
+            get_query_param(query, "id", proj_id, sizeof(proj_id));
+        }
+        int rc = project_delete(proj_id);
+        char resp[128];
+        snprintf(resp, sizeof(resp), "{\"success\":%s}", rc == 0 ? "true" : "false");
+        send_http_response(client, rc == 0 ? 200 : 400, "application/json; charset=utf-8", resp);
+    }
     else if (strcmp(path, "/api/members") == 0 && strcmp(method, "GET") == 0) {
         char proj_id[UUID_STR_LEN] = {0};
         get_query_param(query, "project_id", proj_id, sizeof(proj_id));

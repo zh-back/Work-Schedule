@@ -39,6 +39,23 @@ extern "C" int gui_handle_action(HWND hwnd, const char *action) {
             ShowWindow(hwnd, SW_HIDE);
         }
         return 0;
+    } else if (strncmp(action, "resize_", 7) == 0) {
+        if (hwnd) {
+            WPARAM hitTest = 0;
+            if (strcmp(action, "resize_left") == 0) hitTest = HTLEFT;
+            else if (strcmp(action, "resize_right") == 0) hitTest = HTRIGHT;
+            else if (strcmp(action, "resize_top") == 0) hitTest = HTTOP;
+            else if (strcmp(action, "resize_bottom") == 0) hitTest = HTBOTTOM;
+            else if (strcmp(action, "resize_topleft") == 0) hitTest = HTTOPLEFT;
+            else if (strcmp(action, "resize_topright") == 0) hitTest = HTTOPRIGHT;
+            else if (strcmp(action, "resize_bottomleft") == 0) hitTest = HTBOTTOMLEFT;
+            else if (strcmp(action, "resize_bottomright") == 0) hitTest = HTBOTTOMRIGHT;
+            if (hitTest) {
+                ReleaseCapture();
+                SendMessageW(hwnd, WM_NCLBUTTONDOWN, hitTest, 0);
+            }
+        }
+        return 0;
     }
 
     return -1;
@@ -226,6 +243,13 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
         case WM_SIZE: {
             UpdateWebViewBounds(hwnd);
+            if (g_webview) {
+                if (wParam == SIZE_MAXIMIZED) {
+                    g_webview->ExecuteScript(L"document.body.classList.add('is-maximized');", NULL);
+                } else if (wParam == SIZE_RESTORED) {
+                    g_webview->ExecuteScript(L"document.body.classList.remove('is-maximized');", NULL);
+                }
+            }
             break;
         }
 

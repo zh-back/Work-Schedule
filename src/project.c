@@ -48,6 +48,26 @@ int project_create(const char *name, const char *desc, char *out_project_id) {
     return 0;
 }
 
+int project_delete(const char *project_id) {
+    if (!project_id || strlen(project_id) == 0) return -1;
+    sqlite3 *db = db_get_handle();
+    if (!db) return -1;
+
+    int64_t now = get_current_timestamp_ms();
+    const char *sql = "UPDATE projects SET deleted_at = ?, updated_at = ? WHERE id = ?;";
+    sqlite3_stmt *stmt = NULL;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) return rc;
+
+    sqlite3_bind_int64(stmt, 1, now);
+    sqlite3_bind_int64(stmt, 2, now);
+    sqlite3_bind_text(stmt, 3, project_id, -1, SQLITE_STATIC);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE) ? 0 : -1;
+}
+
 int project_list(ProjectList *out_list) {
     if (!out_list) return -1;
     sqlite3 *db = db_get_handle();

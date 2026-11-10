@@ -43,6 +43,9 @@ typedef struct {
 // Create a new project
 int project_create(const char *name, const char *desc, char *out_project_id);
 
+// Delete (soft-delete) a project
+int project_delete(const char *project_id);
+
 // List all active (non-deleted) projects
 int project_list(ProjectList *out_list);
 void project_list_free(ProjectList *list);

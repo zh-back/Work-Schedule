@@ -12,6 +12,14 @@ int test_gui_action_router(void) {
     ASSERT_EQ_INT(0, gui_handle_action(NULL, "minimize"));
     ASSERT_EQ_INT(0, gui_handle_action(NULL, "maximize"));
     ASSERT_EQ_INT(0, gui_handle_action(NULL, "close"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_left"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_right"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_top"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_bottom"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_topleft"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_topright"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_bottomleft"));
+    ASSERT_EQ_INT(0, gui_handle_action(NULL, "resize_bottomright"));
 
     return 0;
 }

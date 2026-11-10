@@ -60,6 +60,21 @@ int test_project_and_member_lifecycle(void) {
     ASSERT_EQ_INT(0, rc);
     ASSERT_EQ_STR("李四", current_user.name);
 
+    // 6. Delete project
+    rc = project_delete(proj_id);
+    ASSERT_EQ_INT(0, rc);
+    memset(&plist, 0, sizeof(plist));
+    rc = project_list(&plist);
+    ASSERT_EQ_INT(0, rc);
+    int deleted_found = 0;
+    for (int i = 0; i < plist.count; i++) {
+        if (strcmp(plist.items[i].id, proj_id) == 0) {
+            deleted_found = 1;
+        }
+    }
+    ASSERT_TRUE(!deleted_found);
+    project_list_free(&plist);
+
     db_close();
     return 0;
 }

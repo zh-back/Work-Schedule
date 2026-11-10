@@ -13,12 +13,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initEventListeners() {
+  const safeListen = (idOrEl, event, handler) => {
+    const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+    if (el) el.addEventListener(event, handler);
+  };
+
   // Native window controls
   const postWinAction = (act) => {
     if (window.chrome && window.chrome.webview) {
       window.chrome.webview.postMessage(act);
     }
   };
+
+  // 窗口边缘与四角拖拽调整大小 (8 向缩放)
+  document.querySelectorAll('.window-resize-handle').forEach(handle => {
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const resizeDir = handle.dataset.resize;
+      if (resizeDir) {
+        postWinAction(resizeDir);
+      }
+    });
+  });
 
   // 侧边栏折叠/展开逻辑 (Activity Bar 联动)
   const setSidebarCollapsed = (collapsed) => {
@@ -92,18 +108,15 @@ function initEventListeners() {
     });
   }
 
-  document.getElementById('taskInput').addEventListener('keydown', (e) => {
+  safeListen('taskInput', 'keydown', (e) => {
     if (e.isComposing) return;
     if (e.key === 'Enter') {
       createItem(false); // Enter defaults to "+ 加入待办"
     }
   });
 
-  document.getElementById('btnCreateTodo').addEventListener('click', () => createItem(false));
-  const btnMarkDone = document.getElementById('btnMarkDone');
-  if (btnMarkDone) {
-    btnMarkDone.addEventListener('click', () => createItem(true));
-  }
+  safeListen('btnCreateTodo', 'click', () => createItem(false));
+  safeListen('btnMarkDone', 'click', () => createItem(true));
 
   document.querySelectorAll('.shortcut-tag').forEach(tagEl => {
     tagEl.onclick = () => {
@@ -202,16 +215,16 @@ function initEventListeners() {
     }
   }
 
-  document.getElementById('newProjectBtn').addEventListener('click', openProjectModal);
-  document.getElementById('closeProjectModal').addEventListener('click', closeProjectModal);
-  document.getElementById('cancelProjectBtn').addEventListener('click', closeProjectModal);
-  document.getElementById('submitProjectBtn').addEventListener('click', handleCreateProject);
-  newProjectNameInput.addEventListener('keydown', (e) => {
+  safeListen('newProjectBtn', 'click', openProjectModal);
+  safeListen('closeProjectModal', 'click', closeProjectModal);
+  safeListen('cancelProjectBtn', 'click', closeProjectModal);
+  safeListen('submitProjectBtn', 'click', handleCreateProject);
+  safeListen(newProjectNameInput, 'keydown', (e) => {
     if (e.key === 'Enter') handleCreateProject();
   });
-  newProjectNameInput.addEventListener('input', () => {
+  safeListen(newProjectNameInput, 'input', () => {
     newProjectNameInput.classList.remove('error');
-    projectNameError.classList.add('hidden');
+    if (projectNameError) projectNameError.classList.add('hidden');
   });
 
   // --- 添加成员弹窗逻辑 ---
@@ -263,22 +276,22 @@ function initEventListeners() {
     }
   }
 
-  document.getElementById('addMemberBtn').addEventListener('click', openMemberModal);
-  document.getElementById('closeMemberModal').addEventListener('click', closeMemberModal);
-  document.getElementById('cancelMemberBtn').addEventListener('click', closeMemberModal);
-  document.getElementById('submitMemberBtn').addEventListener('click', handleAddMember);
-  newMemberNameInput.addEventListener('keydown', (e) => {
+  safeListen('addMemberBtn', 'click', openMemberModal);
+  safeListen('closeMemberModal', 'click', closeMemberModal);
+  safeListen('cancelMemberBtn', 'click', closeMemberModal);
+  safeListen('submitMemberBtn', 'click', handleAddMember);
+  safeListen(newMemberNameInput, 'keydown', (e) => {
     if (e.key === 'Enter') handleAddMember();
   });
-  newMemberNameInput.addEventListener('input', () => {
+  safeListen(newMemberNameInput, 'input', () => {
     newMemberNameInput.classList.remove('error');
-    memberNameError.classList.add('hidden');
+    if (memberNameError) memberNameError.classList.add('hidden');
   });
 
   // --- 通用确认弹窗交互 ---
-  document.getElementById('closeConfirmModal').addEventListener('click', () => resolveConfirm(false));
-  document.getElementById('cancelConfirmBtn').addEventListener('click', () => resolveConfirm(false));
-  document.getElementById('submitConfirmBtn').addEventListener('click', () => resolveConfirm(true));
+  safeListen('closeConfirmModal', 'click', () => resolveConfirm(false));
+  safeListen('cancelConfirmBtn', 'click', () => resolveConfirm(false));
+  safeListen('submitConfirmBtn', 'click', () => resolveConfirm(true));
 
   // --- 全局弹窗背景遮罩与 Esc 关闭 ---
   document.querySelectorAll('.modal-overlay').forEach(modal => {
@@ -305,22 +318,26 @@ function initEventListeners() {
     }
   });
 
-  document.getElementById('openPersonalSummaryBtn').addEventListener('click', () => openSummary('personal'));
-  document.getElementById('openProjectSummaryBtn').addEventListener('click', () => openSummary('project'));
+  safeListen('openPersonalSummaryBtn', 'click', () => openSummary('personal'));
+  safeListen('openProjectSummaryBtn', 'click', () => openSummary('project'));
 
-  document.getElementById('closeSummaryModal').addEventListener('click', () => {
-    document.getElementById('summaryModal').classList.add('hidden');
+  safeListen('closeSummaryModal', 'click', () => {
+    const modal = document.getElementById('summaryModal');
+    if (modal) modal.classList.add('hidden');
   });
 
-  document.getElementById('copySummaryBtn').addEventListener('click', async () => {
-    const text = document.getElementById('summaryMarkdownView').value;
+  safeListen('copySummaryBtn', 'click', async () => {
+    const view = document.getElementById('summaryMarkdownView');
+    const text = view ? view.value : '';
     try {
       await navigator.clipboard.writeText(text);
       const tip = document.getElementById('copyTip');
-      tip.classList.remove('hidden');
-      setTimeout(() => tip.classList.add('hidden'), 2000);
+      if (tip) {
+        tip.classList.remove('hidden');
+        setTimeout(() => tip.classList.add('hidden'), 2000);
+      }
     } catch (e) {
-      document.getElementById('summaryMarkdownView').select();
+      if (view) view.select();
     }
   });
 
@@ -424,12 +441,14 @@ function initEventListeners() {
   // --- 自定义右键操作菜单系统 ---
   const ctxMenu = document.getElementById('customContextMenu');
   let g_activeContextItem = null;
+  let g_activeContextProject = null;
   let g_selectedText = '';
 
   const hideContextMenu = () => {
     if (ctxMenu && !ctxMenu.classList.contains('hidden')) {
       ctxMenu.classList.add('hidden');
       g_activeContextItem = null;
+      g_activeContextProject = null;
     }
   };
 
@@ -440,6 +459,7 @@ function initEventListeners() {
     const itemCard = e.target.closest('.item-card');
     const ctxGroupItem = document.getElementById('ctxGroupItem');
     const ctxGroupText = document.getElementById('ctxGroupText');
+    const ctxGroupProject = document.getElementById('ctxGroupProject');
 
     if (itemCard) {
       const checkbox = itemCard.querySelector('.item-checkbox');
@@ -450,49 +470,63 @@ function initEventListeners() {
 
       g_activeContextItem = { id: itemId, content: content, isDone: isDone };
 
-      ctxGroupItem.style.display = 'block';
+      if (ctxGroupItem) ctxGroupItem.style.display = 'block';
       const iconToggle = document.getElementById('ctxIconToggleStatus');
       const textToggle = document.getElementById('ctxTextToggleStatus');
 
       if (isDone) {
-        iconToggle.innerText = '↩️';
-        textToggle.innerText = '恢复为待办 (取消完成)';
+        if (iconToggle) iconToggle.innerText = '↩️';
+        if (textToggle) textToggle.innerText = '恢复为待办 (取消完成)';
       } else {
-        iconToggle.innerText = '⚡';
-        textToggle.innerText = '标记为已完成';
+        if (iconToggle) iconToggle.innerText = '⚡';
+        if (textToggle) textToggle.innerText = '标记为已完成';
       }
     } else {
-      ctxGroupItem.style.display = 'none';
+      if (ctxGroupItem) ctxGroupItem.style.display = 'none';
       g_activeContextItem = null;
+    }
+
+    // 检查是否右键了项目项
+    const projectItem = e.target.closest('.project-item');
+    if (projectItem) {
+      const projId = projectItem.dataset.id;
+      const projName = projectItem.dataset.name || (projectItem.querySelector('.project-name-wrap') ? projectItem.querySelector('.project-name-wrap').innerText.replace(/^📁\s*/, '') : '');
+      g_activeContextProject = { id: projId, name: projName };
+      if (ctxGroupProject) ctxGroupProject.style.display = 'block';
+    } else {
+      if (ctxGroupProject) ctxGroupProject.style.display = 'none';
+      g_activeContextProject = null;
     }
 
     // 检查是否有选中文本
     const sel = window.getSelection().toString().trim();
     if (sel) {
-      ctxGroupText.style.display = 'block';
+      if (ctxGroupText) ctxGroupText.style.display = 'block';
       g_selectedText = sel;
     } else {
-      ctxGroupText.style.display = 'none';
+      if (ctxGroupText) ctxGroupText.style.display = 'none';
       g_selectedText = '';
     }
 
     // 显示并定位右键菜单
-    ctxMenu.classList.remove('hidden');
-    const menuWidth = ctxMenu.offsetWidth || 184;
-    const menuHeight = ctxMenu.offsetHeight || 220;
+    if (ctxMenu) {
+      ctxMenu.classList.remove('hidden');
+      const menuWidth = ctxMenu.offsetWidth || 184;
+      const menuHeight = ctxMenu.offsetHeight || 220;
 
-    let posX = e.clientX;
-    let posY = e.clientY;
+      let posX = e.clientX;
+      let posY = e.clientY;
 
-    if (posX + menuWidth > window.innerWidth) {
-      posX = window.innerWidth - menuWidth - 8;
+      if (posX + menuWidth > window.innerWidth) {
+        posX = window.innerWidth - menuWidth - 8;
+      }
+      if (posY + menuHeight > window.innerHeight) {
+        posY = window.innerHeight - menuHeight - 8;
+      }
+
+      ctxMenu.style.left = `${Math.max(8, posX)}px`;
+      ctxMenu.style.top = `${Math.max(8, posY)}px`;
     }
-    if (posY + menuHeight > window.innerHeight) {
-      posY = window.innerHeight - menuHeight - 8;
-    }
-
-    ctxMenu.style.left = `${Math.max(8, posX)}px`;
-    ctxMenu.style.top = `${Math.max(8, posY)}px`;
   });
 
   document.addEventListener('click', (e) => {
@@ -507,7 +541,7 @@ function initEventListeners() {
     if (e.key === 'Escape') hideContextMenu();
   });
 
-  document.getElementById('ctxBtnToggleStatus').addEventListener('click', () => {
+  safeListen('ctxBtnToggleStatus', 'click', () => {
     if (g_activeContextItem && g_activeContextItem.id) {
       if (g_activeContextItem.isDone) {
         markItemTodo(g_activeContextItem.id);
@@ -518,7 +552,7 @@ function initEventListeners() {
     hideContextMenu();
   });
 
-  document.getElementById('ctxBtnCopyContent').addEventListener('click', async () => {
+  safeListen('ctxBtnCopyContent', 'click', async () => {
     if (g_activeContextItem && g_activeContextItem.content) {
       try {
         await navigator.clipboard.writeText(g_activeContextItem.content);
@@ -527,14 +561,21 @@ function initEventListeners() {
     hideContextMenu();
   });
 
-  document.getElementById('ctxBtnDeleteItem').addEventListener('click', () => {
+  safeListen('ctxBtnDeleteItem', 'click', () => {
     if (g_activeContextItem && g_activeContextItem.id) {
       deleteItem(g_activeContextItem.id, g_activeContextItem.content);
     }
     hideContextMenu();
   });
 
-  document.getElementById('ctxBtnCopyText').addEventListener('click', async () => {
+  safeListen('ctxBtnDeleteProject', 'click', () => {
+    if (g_activeContextProject && g_activeContextProject.id) {
+      deleteProject(g_activeContextProject.id, g_activeContextProject.name);
+    }
+    hideContextMenu();
+  });
+
+  safeListen('ctxBtnCopyText', 'click', async () => {
     if (g_selectedText) {
       try {
         await navigator.clipboard.writeText(g_selectedText);
@@ -543,7 +584,7 @@ function initEventListeners() {
     hideContextMenu();
   });
 
-  document.getElementById('ctxBtnNewTodo').addEventListener('click', () => {
+  safeListen('ctxBtnNewTodo', 'click', () => {
     hideContextMenu();
     const input = document.getElementById('taskInput');
     if (input) {
@@ -552,30 +593,27 @@ function initEventListeners() {
     }
   });
 
-  document.getElementById('ctxBtnNewProject').addEventListener('click', () => {
+  safeListen('ctxBtnNewProject', 'click', () => {
     hideContextMenu();
     openProjectModal();
   });
 
-  document.getElementById('ctxBtnAddMember').addEventListener('click', () => {
+  safeListen('ctxBtnAddMember', 'click', () => {
     hideContextMenu();
     openMemberModal();
   });
 
-  document.getElementById('ctxBtnWeeklySummary').addEventListener('click', () => {
+  safeListen('ctxBtnWeeklySummary', 'click', () => {
     hideContextMenu();
     openSummary('project');
   });
 
-  const ctxBtnSettings = document.getElementById('ctxBtnSettings');
-  if (ctxBtnSettings) {
-    ctxBtnSettings.addEventListener('click', () => {
-      hideContextMenu();
-      openSettingsModal('appearance');
-    });
-  }
+  safeListen('ctxBtnSettings', 'click', () => {
+    hideContextMenu();
+    openSettingsModal('appearance');
+  });
 
-  document.getElementById('ctxBtnRefresh').addEventListener('click', async () => {
+  safeListen('ctxBtnRefresh', 'click', async () => {
     hideContextMenu();
     await loadProjects();
     await loadMembers();
@@ -721,16 +759,34 @@ async function loadProjects() {
   g_projects = await res.json();
 
   const ul = document.getElementById('projectList');
-  ul.innerHTML = '';
+  if (ul) {
+    ul.innerHTML = '';
 
-  g_projects.forEach(p => {
-    const li = document.createElement('li');
-    li.className = 'project-item' + (p.id === g_currentProjectId ? ' active' : '');
-    li.dataset.id = p.id;
-    li.innerHTML = `<span>📁 ${escapeHtml(p.name)}</span>`;
-    li.onclick = () => selectProject(p.id);
-    ul.appendChild(li);
-  });
+    g_projects.forEach(p => {
+      const li = document.createElement('li');
+      li.className = 'project-item' + (p.id === g_currentProjectId ? ' active' : '');
+      li.dataset.id = p.id;
+      li.dataset.name = p.name;
+      li.innerHTML = `
+        <span class="project-name-wrap" title="${escapeHtml(p.name)}">📁 ${escapeHtml(p.name)}</span>
+        <button class="project-delete-btn" title="删除项目「${escapeHtml(p.name)}」" data-id="${p.id}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      `;
+      li.onclick = (e) => {
+        if (e.target.closest('.project-delete-btn')) {
+          e.stopPropagation();
+          deleteProject(p.id, p.name);
+          return;
+        }
+        selectProject(p.id);
+      };
+      ul.appendChild(li);
+    });
+  }
 
   const savedProjId = localStorage.getItem('app_current_project');
   let targetProj = g_projects.find(p => p.id === savedProjId) ||
@@ -738,6 +794,40 @@ async function loadProjects() {
                    g_projects[0];
   if (targetProj) {
     selectProject(targetProj.id);
+  }
+}
+
+async function deleteProject(projectId, projectName) {
+  if (g_projects.length <= 1) {
+    await showConfirmDialog('提示', '当前仅剩一个项目，请至少保留一个协同项目。', '⚠️', '我知道了', false);
+    return;
+  }
+
+  const confirmed = await showConfirmDialog(
+    '删除协同项目',
+    `确定要删除项目「${projectName || '未命名'}」吗？\n删除后该项目将从列表中移除。`,
+    '🗑️',
+    '确定删除',
+    true
+  );
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch('/api/projects/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: projectId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (g_currentProjectId === projectId) {
+        localStorage.removeItem('app_current_project');
+        g_currentProjectId = null;
+      }
+      await loadProjects();
+    }
+  } catch (err) {
+    console.error('Delete project error:', err);
   }
 }
 

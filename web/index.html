@@ -8,6 +8,16 @@
   <link rel="stylesheet" href="/css/apifox-theme.css">
 </head>
 <body>
+  <!-- 窗口无边框 8 向缩放手柄 -->
+  <div class="window-resize-handle resize-top" data-resize="resize_top"></div>
+  <div class="window-resize-handle resize-bottom" data-resize="resize_bottom"></div>
+  <div class="window-resize-handle resize-left" data-resize="resize_left"></div>
+  <div class="window-resize-handle resize-right" data-resize="resize_right"></div>
+  <div class="window-resize-handle resize-topleft" data-resize="resize_topleft"></div>
+  <div class="window-resize-handle resize-topright" data-resize="resize_topright"></div>
+  <div class="window-resize-handle resize-bottomleft" data-resize="resize_bottomleft"></div>
+  <div class="window-resize-handle resize-bottomright" data-resize="resize_bottomright"></div>
+
   <div class="app-layout">
     <!-- 顶部应用标题栏 (Apifox 官方深色原生设计) -->
     <header class="top-nav">
@@ -520,6 +530,14 @@
       <button class="ctx-item" id="ctxBtnCopyText">
         <span class="ctx-icon">📋</span>
         <span class="ctx-text">复制所选文字</span>
+      </button>
+      <div class="ctx-divider"></div>
+    </div>
+
+    <div class="context-menu-group" id="ctxGroupProject" style="display: none;">
+      <button class="ctx-item ctx-danger" id="ctxBtnDeleteProject">
+        <span class="ctx-icon">🗑️</span>
+        <span class="ctx-text">删除该项目</span>
       </button>
       <div class="ctx-divider"></div>
     </div>
