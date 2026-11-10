@@ -904,7 +904,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   min-height: 0;
   height: 100%;
 }
@@ -1082,24 +1082,26 @@ body {
 
 .empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 120px;
-  font-size: 12px;
+  gap: 8px;
+  height: 140px;
+  font-size: 12.5px;
   color: var(--text-light);
-  border: 1px dashed #2c2c3a;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.01);
+  border: none;
+  background: transparent;
+  user-select: none;
 }
 
 .item-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   transition: all 0.15s ease;
   position: relative;
 }
@@ -1108,7 +1110,7 @@ body {
   background: var(--bg-card-hover);
   border-color: var(--border-hover);
   transform: translateY(-0.5px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .item-checkbox {

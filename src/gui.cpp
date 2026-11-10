@@ -129,22 +129,7 @@ static void UpdateWebViewBounds(HWND hwnd) {
     if (!g_controller) return;
     RECT client;
     GetClientRect(hwnd, &client);
-
-    WINDOWPLACEMENT wp;
-    memset(&wp, 0, sizeof(wp));
-    wp.length = sizeof(wp);
-    GetWindowPlacement(hwnd, &wp);
-    bool isMaximized = (wp.showCmd == SW_SHOWMAXIMIZED);
-
-    RECT bounds = client;
-    if (!isMaximized) {
-        const int border = 5;
-        bounds.left += border;
-        bounds.top += border;
-        bounds.right -= border;
-        bounds.bottom -= border;
-    }
-    g_controller->put_Bounds(bounds);
+    g_controller->put_Bounds(client);
 }
 
 HRESULT STDMETHODCALLTYPE ControllerCompletedHandler::Invoke(HRESULT hr, ICoreWebView2Controller *controller) {
@@ -398,6 +383,10 @@ extern "C" int gui_window_create_and_run(int http_port) {
     // Enable native window shadow via DWM
     MARGINS margins = {1, 1, 1, 1};
     DwmExtendFrameIntoClientArea(hwnd, &margins);
+
+    // Windows 11 native rounded corners (DWMWA_WINDOW_CORNER_PREFERENCE = 33, DWMWCP_ROUND = 2)
+    DWORD cornerPref = 2;
+    DwmSetWindowAttribute(hwnd, 33, &cornerPref, sizeof(cornerPref));
 
     // Initialize System Tray
     tray_init(hwnd, hInstance, L"Schedule & WorkLog - 日程与工作记录");
