@@ -136,18 +136,21 @@ function initEventListeners() {
     });
   }
 
-  document.getElementById('userSelector').addEventListener('change', async (e) => {
-    const newUserId = e.target.value;
-    if (newUserId && newUserId !== g_currentUserId) {
-      await fetch('/api/user/switch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: newUserId })
-      });
-      g_currentUserId = newUserId;
-      await loadItems();
-    }
-  });
+  const userSelectorEl = document.getElementById('userSelector');
+  if (userSelectorEl) {
+    userSelectorEl.addEventListener('change', async (e) => {
+      const newUserId = e.target.value;
+      if (newUserId && newUserId !== g_currentUserId) {
+        await fetch('/api/user/switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: newUserId })
+        });
+        g_currentUserId = newUserId;
+        await loadItems();
+      }
+    });
+  }
 
   // --- 新建项目弹窗逻辑 ---
   const projectModal = document.getElementById('projectModal');
@@ -724,7 +727,7 @@ async function loadProjects() {
     const li = document.createElement('li');
     li.className = 'project-item' + (p.id === g_currentProjectId ? ' active' : '');
     li.dataset.id = p.id;
-    li.innerHTML = `<span>📁 ${escapeHtml(p.name)}</span><span style="font-size:11px;color:#94a3b8;">${p.member_count}人</span>`;
+    li.innerHTML = `<span>📁 ${escapeHtml(p.name)}</span>`;
     li.onclick = () => selectProject(p.id);
     ul.appendChild(li);
   });
@@ -770,23 +773,27 @@ async function loadMembers() {
   }
 
   const userSelect = document.getElementById('userSelector');
-  userSelect.innerHTML = '';
-  g_members.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.innerText = m.name + (m.role === 'owner' ? ' (Leader)' : '');
-    if (m.id === g_currentUserId) opt.selected = true;
-    userSelect.appendChild(opt);
-  });
+  if (userSelect) {
+    userSelect.innerHTML = '';
+    g_members.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.innerText = m.name + (m.role === 'owner' ? ' (Leader)' : '');
+      if (m.id === g_currentUserId) opt.selected = true;
+      userSelect.appendChild(opt);
+    });
+  }
 
   const memberUl = document.getElementById('projectMemberList');
-  memberUl.innerHTML = '';
-  g_members.forEach(m => {
-    const li = document.createElement('li');
-    li.className = 'member-item';
-    li.innerHTML = `<span>👤 ${escapeHtml(m.name)}</span><span class="member-role">${escapeHtml(m.role)}</span>`;
-    memberUl.appendChild(li);
-  });
+  if (memberUl) {
+    memberUl.innerHTML = '';
+    g_members.forEach(m => {
+      const li = document.createElement('li');
+      li.className = 'member-item';
+      li.innerHTML = `<span>👤 ${escapeHtml(m.name)}</span><span class="member-role">${escapeHtml(m.role)}</span>`;
+      memberUl.appendChild(li);
+    });
+  }
 }
 
 async function loadItems() {

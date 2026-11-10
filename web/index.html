@@ -38,21 +38,21 @@
       </div>
 
       <div class="top-nav-right">
-        <!-- Apifox 风格身份选择胶囊 (参考正式环境胶囊) -->
-        <div class="user-capsule-wrap">
+        <!-- 本地单机模式下隐藏多用户切换胶囊，保留本地核心控制 -->
+        <div class="user-capsule-wrap" style="display: none;">
           <div class="user-capsule">
             <span class="capsule-badge">👤</span>
             <select id="userSelector" class="user-capsule-select"></select>
             <span class="capsule-arrow">▾</span>
           </div>
           <button id="addMemberBtn" class="btn-top-subtle" title="添加新成员">+ 成员</button>
-          <button id="openSettingsBtn" class="win-btn-settings" title="外观与系统设置 (Ctrl+,)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-          </button>
         </div>
+        <button id="openSettingsBtn" class="win-btn-settings" title="外观与系统设置 (Ctrl+,)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
 
         <!-- Windows 原生无边框控制三键 (─, □, ✕) -->
         <div class="window-controls">
@@ -113,7 +113,7 @@
           <ul id="projectList" class="project-menu"></ul>
         </div>
 
-        <div class="sidebar-section">
+        <div class="sidebar-section" style="display: none;">
           <div class="sidebar-header">
             <span>当前项目成员</span>
           </div>
@@ -124,8 +124,7 @@
           <div class="sidebar-header">
             <span>智能聚合周报</span>
           </div>
-          <button id="openPersonalSummaryBtn" class="view-btn">📊 个人全项目周报</button>
-          <button id="openProjectSummaryBtn" class="view-btn">👥 本项目全员周报</button>
+          <button id="openPersonalSummaryBtn" class="view-btn">📊 生成本周工作总结</button>
         </div>
       </aside>
 

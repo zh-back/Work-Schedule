@@ -1592,6 +1592,7 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   outline: none;
+  margin-right: 12px;
 }
 
 .win-btn-settings * {
