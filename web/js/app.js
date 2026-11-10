@@ -85,7 +85,10 @@ function initEventListeners() {
   });
 
   document.getElementById('btnCreateTodo').addEventListener('click', () => createItem(false));
-  document.getElementById('btnMarkDone').addEventListener('click', () => createItem(true));
+  const btnMarkDone = document.getElementById('btnMarkDone');
+  if (btnMarkDone) {
+    btnMarkDone.addEventListener('click', () => createItem(true));
+  }
 
   document.querySelectorAll('.shortcut-tag').forEach(tagEl => {
     tagEl.onclick = () => {
