@@ -1121,6 +1121,147 @@ body {
   display: none;
 }
 
+/* ==========================================================================
+   通用暗黑弹窗与表单设计 (Apifox Design System)
+   ========================================================================== */
+.modal-box-sm {
+  width: 440px;
+}
+
+.modal-box-alert {
+  width: 420px;
+}
+
+.modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-title-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 22px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.required-star {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.optional-label {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.form-input {
+  background: #141418;
+  border: 1px solid #30303e;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #f8fafc;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: #555566;
+}
+
+.form-input:focus {
+  border-color: var(--apifox-purple);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+  background: #16161c;
+}
+
+.form-input.error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+.form-error {
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+.form-error.hidden {
+  display: none;
+}
+
+.form-textarea {
+  height: 76px;
+  resize: none;
+  line-height: 1.5;
+}
+
+.btn-secondary {
+  background: #23232c;
+  border: 1px solid #30303e;
+  color: #94a3b8;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-secondary:hover {
+  background: #2b2b36;
+  color: #ffffff;
+  border-color: #424254;
+}
+
+.btn-danger {
+  background: #dc2626;
+  border: none;
+  color: #ffffff;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  user-select: none;
+}
+
+.btn-danger:hover {
+  background: #ef4444;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.45);
+}
+
+.confirm-message {
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
 /* 自定义暗黑滚动条 */
 ::-webkit-scrollbar {
   width: 6px;

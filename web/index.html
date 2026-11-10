@@ -245,6 +245,78 @@
     </div>
   </div>
 
+  <!-- 新建项目弹窗 Modal (Apifox 旗舰暗黑质感) -->
+  <div id="projectModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-title-icon">📁</span>
+          <h3>新建协同项目</h3>
+        </div>
+        <button id="closeProjectModal" class="close-btn" title="关闭">&times;</button>
+      </div>
+      <div class="modal-body form-body">
+        <div class="form-group">
+          <label class="form-label" for="newProjectName">项目名称 <span class="required-star">*</span></label>
+          <input type="text" id="newProjectName" class="form-input" placeholder="例如：ALFIT 核心服务、敏捷排期..." autocomplete="off">
+          <span id="projectNameError" class="form-error hidden">请输入项目名称</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newProjectDesc">项目描述 <span class="optional-label">(可选)</span></label>
+          <textarea id="newProjectDesc" class="form-input form-textarea" placeholder="填写项目的目标或协同范围说明..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelProjectBtn" class="btn btn-secondary">取消</button>
+        <button id="submitProjectBtn" class="btn btn-apifox-primary">创建项目</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加项目成员弹窗 Modal -->
+  <div id="memberModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-title-icon">👤</span>
+          <h3>添加项目成员</h3>
+        </div>
+        <button id="closeMemberModal" class="close-btn" title="关闭">&times;</button>
+      </div>
+      <div class="modal-body form-body">
+        <div class="form-group">
+          <label class="form-label" for="newMemberName">成员姓名 <span class="required-star">*</span></label>
+          <input type="text" id="newMemberName" class="form-input" placeholder="请输入成员姓名或花名..." autocomplete="off">
+          <span id="memberNameError" class="form-error hidden">请输入成员姓名</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelMemberBtn" class="btn btn-secondary">取消</button>
+        <button id="submitMemberBtn" class="btn btn-apifox-primary">确认添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通用确认/删除弹窗 Modal -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-alert">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-title-icon" id="confirmModalIcon">🗑️</span>
+          <h3 id="confirmModalTitle">操作确认</h3>
+        </div>
+        <button id="closeConfirmModal" class="close-btn" title="关闭">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage" class="confirm-message"></p>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelConfirmBtn" class="btn btn-secondary">取消</button>
+        <button id="submitConfirmBtn" class="btn btn-danger">确定删除</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/app.js"></script>
 </body>
 </html>

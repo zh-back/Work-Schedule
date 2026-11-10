@@ -149,37 +149,156 @@ function initEventListeners() {
     }
   });
 
-  document.getElementById('newProjectBtn').addEventListener('click', async () => {
-    const name = prompt('请输入新项目名称:');
-    if (!name || !name.trim()) return;
-    const desc = prompt('请输入项目描述 (可选):') || '';
+  // --- 新建项目弹窗逻辑 ---
+  const projectModal = document.getElementById('projectModal');
+  const newProjectNameInput = document.getElementById('newProjectName');
+  const newProjectDescInput = document.getElementById('newProjectDesc');
+  const projectNameError = document.getElementById('projectNameError');
 
-    const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.trim(), description: desc.trim() })
-    });
-    const data = await res.json();
-    if (data.success) {
-      await loadProjects();
-      selectProject(data.id);
+  function openProjectModal() {
+    newProjectNameInput.value = '';
+    newProjectDescInput.value = '';
+    newProjectNameInput.classList.remove('error');
+    projectNameError.classList.add('hidden');
+    projectModal.classList.remove('hidden');
+    setTimeout(() => newProjectNameInput.focus(), 60);
+  }
+
+  function closeProjectModal() {
+    projectModal.classList.add('hidden');
+  }
+
+  async function handleCreateProject() {
+    const name = newProjectNameInput.value.trim();
+    const desc = newProjectDescInput.value.trim();
+    if (!name) {
+      newProjectNameInput.classList.add('error');
+      projectNameError.classList.remove('hidden');
+      newProjectNameInput.focus();
+      return;
     }
+
+    const btn = document.getElementById('submitProjectBtn');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, description: desc })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeProjectModal();
+        await loadProjects();
+        selectProject(data.id);
+      }
+    } catch (e) {
+      console.error('Create project failed:', e);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('newProjectBtn').addEventListener('click', openProjectModal);
+  document.getElementById('closeProjectModal').addEventListener('click', closeProjectModal);
+  document.getElementById('cancelProjectBtn').addEventListener('click', closeProjectModal);
+  document.getElementById('submitProjectBtn').addEventListener('click', handleCreateProject);
+  newProjectNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleCreateProject();
+  });
+  newProjectNameInput.addEventListener('input', () => {
+    newProjectNameInput.classList.remove('error');
+    projectNameError.classList.add('hidden');
   });
 
-  document.getElementById('addMemberBtn').addEventListener('click', async () => {
-    if (!g_currentProjectId) return;
-    const name = prompt('请输入新成员姓名:');
-    if (!name || !name.trim()) return;
+  // --- 添加成员弹窗逻辑 ---
+  const memberModal = document.getElementById('memberModal');
+  const newMemberNameInput = document.getElementById('newMemberName');
+  const memberNameError = document.getElementById('memberNameError');
 
-    const res = await fetch('/api/members', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project_id: g_currentProjectId, name: name.trim(), role: 'member' })
+  function openMemberModal() {
+    if (!g_currentProjectId) return;
+    newMemberNameInput.value = '';
+    newMemberNameInput.classList.remove('error');
+    memberNameError.classList.add('hidden');
+    memberModal.classList.remove('hidden');
+    setTimeout(() => newMemberNameInput.focus(), 60);
+  }
+
+  function closeMemberModal() {
+    memberModal.classList.add('hidden');
+  }
+
+  async function handleAddMember() {
+    if (!g_currentProjectId) return;
+    const name = newMemberNameInput.value.trim();
+    if (!name) {
+      newMemberNameInput.classList.add('error');
+      memberNameError.classList.remove('hidden');
+      newMemberNameInput.focus();
+      return;
+    }
+
+    const btn = document.getElementById('submitMemberBtn');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: g_currentProjectId, name: name, role: 'member' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeMemberModal();
+        await loadCurrentUser();
+        await loadMembers();
+      }
+    } catch (e) {
+      console.error('Add member failed:', e);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('addMemberBtn').addEventListener('click', openMemberModal);
+  document.getElementById('closeMemberModal').addEventListener('click', closeMemberModal);
+  document.getElementById('cancelMemberBtn').addEventListener('click', closeMemberModal);
+  document.getElementById('submitMemberBtn').addEventListener('click', handleAddMember);
+  newMemberNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleAddMember();
+  });
+  newMemberNameInput.addEventListener('input', () => {
+    newMemberNameInput.classList.remove('error');
+    memberNameError.classList.add('hidden');
+  });
+
+  // --- 通用确认弹窗交互 ---
+  document.getElementById('closeConfirmModal').addEventListener('click', () => resolveConfirm(false));
+  document.getElementById('cancelConfirmBtn').addEventListener('click', () => resolveConfirm(false));
+  document.getElementById('submitConfirmBtn').addEventListener('click', () => resolveConfirm(true));
+
+  // --- 全局弹窗背景遮罩与 Esc 关闭 ---
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        if (modal.id === 'confirmModal') {
+          resolveConfirm(false);
+        } else {
+          modal.classList.add('hidden');
+        }
+      }
     });
-    const data = await res.json();
-    if (data.success) {
-      await loadCurrentUser();
-      await loadMembers();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const confirmModal = document.getElementById('confirmModal');
+      if (confirmModal && !confirmModal.classList.contains('hidden')) {
+        resolveConfirm(false);
+      }
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.classList.add('hidden');
+      });
     }
   });
 
@@ -198,7 +317,7 @@ function initEventListeners() {
       tip.classList.remove('hidden');
       setTimeout(() => tip.classList.add('hidden'), 2000);
     } catch (e) {
-      alert('已选中内容，请按 Ctrl+C 复制');
+      document.getElementById('summaryMarkdownView').select();
     }
   });
 
@@ -576,9 +695,38 @@ async function markItemTodo(itemId) {
   }
 }
 
+let g_confirmResolver = null;
+
+function showConfirmDialog(title, message, icon = '🗑️', confirmText = '确定删除', isDanger = true) {
+  return new Promise((resolve) => {
+    g_confirmResolver = resolve;
+    document.getElementById('confirmModalIcon').innerText = icon;
+    document.getElementById('confirmModalTitle').innerText = title;
+    document.getElementById('confirmModalMessage').innerText = message;
+
+    const submitBtn = document.getElementById('submitConfirmBtn');
+    submitBtn.innerText = confirmText;
+    submitBtn.className = isDanger ? 'btn btn-danger' : 'btn btn-apifox-primary';
+
+    document.getElementById('confirmModal').classList.remove('hidden');
+    setTimeout(() => submitBtn.focus(), 60);
+  });
+}
+
+function resolveConfirm(result) {
+  const confirmModal = document.getElementById('confirmModal');
+  if (confirmModal) confirmModal.classList.add('hidden');
+  if (g_confirmResolver) {
+    const res = g_confirmResolver;
+    g_confirmResolver = null;
+    res(result);
+  }
+}
+
 async function deleteItem(itemId, itemContent) {
-  const shortText = itemContent && itemContent.length > 25 ? itemContent.substring(0, 25) + '...' : (itemContent || '该事项');
-  if (!confirm(`确定要删除此项工作记录吗？\n\n"${shortText}"`)) {
+  const shortText = itemContent && itemContent.length > 30 ? itemContent.substring(0, 30) + '...' : (itemContent || '该事项');
+  const confirmed = await showConfirmDialog('删除事项确认', `确定要彻底删除此项工作记录吗？\n\n"${shortText}"`);
+  if (!confirmed) {
     return;
   }
 
@@ -590,8 +738,6 @@ async function deleteItem(itemId, itemContent) {
 
   if (res.ok) {
     await loadItems();
-  } else {
-    alert('删除失败，请稍后重试');
   }
 }
 
