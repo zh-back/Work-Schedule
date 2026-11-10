@@ -321,7 +321,7 @@ body {
   letter-spacing: 0.3px;
 }
 
-/* Apifox 风格 Tab 标签页 */
+/* Apifox 风格 Tab 标签页 (支持多项目切换，最多3个) */
 .nav-tabs-group {
   display: flex;
   align-items: center;
@@ -339,14 +339,57 @@ body {
   padding: 3.5px 12px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-white);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
+  user-select: none;
+  max-width: 150px;
+}
+
+.nav-tab-pill .nav-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-tab-pill:hover {
   background: var(--bg-subtle-hover);
   border-color: var(--border-hover);
+  color: var(--text-body);
+}
+
+.nav-tab-pill.active {
+  background: var(--bg-subtle-hover);
+  border-color: var(--border-hover);
+  color: var(--text-white);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+}
+
+/* 亮色主题适配 */
+[data-theme="light-pure"] .nav-tab-pill,
+[data-theme="light-warm"] .nav-tab-pill,
+[data-theme="light"] .nav-tab-pill {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: transparent;
+  color: #64748b;
+}
+
+[data-theme="light-pure"] .nav-tab-pill:hover,
+[data-theme="light-warm"] .nav-tab-pill:hover,
+[data-theme="light"] .nav-tab-pill:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+}
+
+[data-theme="light-pure"] .nav-tab-pill.active,
+[data-theme="light-warm"] .nav-tab-pill.active,
+[data-theme="light"] .nav-tab-pill.active {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .top-nav-right {

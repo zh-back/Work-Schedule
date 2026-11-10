@@ -2,6 +2,7 @@
 let g_currentProjectId = null;
 let g_currentUserId = null;
 let g_projects = [];
+let g_topTabProjectIds = [];
 let g_members = [];
 let g_currentFilterDate = 'today';
 let g_isPrivate = false;
@@ -794,7 +795,51 @@ async function loadProjects() {
                    g_projects[0];
   if (targetProj) {
     selectProject(targetProj.id);
+  } else {
+    renderTopNavTabs();
   }
+}
+
+function renderTopNavTabs() {
+  const container = document.getElementById('navTabsGroup');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // 过滤掉已不存在的项目
+  g_topTabProjectIds = g_topTabProjectIds.filter(id => g_projects.some(p => p.id === id));
+
+  // 保证当前选中的项目优先显示在标签页中
+  if (g_currentProjectId && !g_topTabProjectIds.includes(g_currentProjectId)) {
+    if (g_topTabProjectIds.length >= 3) {
+      g_topTabProjectIds.pop();
+    }
+    g_topTabProjectIds.push(g_currentProjectId);
+  }
+
+  // 若不足 3 个，用其他可用项目依次补齐至最多 3 个
+  if (g_topTabProjectIds.length < 3) {
+    for (const p of g_projects) {
+      if (!g_topTabProjectIds.includes(p.id)) {
+        g_topTabProjectIds.push(p.id);
+        if (g_topTabProjectIds.length >= 3) break;
+      }
+    }
+  }
+
+  g_topTabProjectIds.forEach(id => {
+    const p = g_projects.find(x => x.id === id);
+    if (!p) return;
+    const pill = document.createElement('div');
+    pill.className = 'nav-tab-pill' + (p.id === g_currentProjectId ? ' active' : '');
+    pill.dataset.id = p.id;
+    pill.title = p.name;
+    pill.innerHTML = `
+      <span class="nav-tab-icon">📁</span>
+      <span class="nav-tab-title">${escapeHtml(p.name)}</span>
+    `;
+    pill.onclick = () => selectProject(p.id);
+    container.appendChild(pill);
+  });
 }
 
 async function deleteProject(projectId, projectName) {
@@ -820,6 +865,7 @@ async function deleteProject(projectId, projectName) {
     });
     const data = await res.json();
     if (data.success) {
+      g_topTabProjectIds = g_topTabProjectIds.filter(id => id !== projectId);
       if (g_currentProjectId === projectId) {
         localStorage.removeItem('app_current_project');
         g_currentProjectId = null;
@@ -834,12 +880,23 @@ async function deleteProject(projectId, projectName) {
 async function selectProject(projId) {
   g_currentProjectId = projId;
   localStorage.setItem('app_current_project', projId);
+
+  // 保证当前选中的项目在顶部最多 3 个标签页中可见
+  if (!g_topTabProjectIds.includes(projId)) {
+    if (g_topTabProjectIds.length >= 3) {
+      g_topTabProjectIds.pop();
+    }
+    g_topTabProjectIds.push(projId);
+  }
+
+  renderTopNavTabs();
+
   const p = g_projects.find(x => x.id === projId);
   if (p) {
-    document.getElementById('currentProjectTitle').innerText = p.name;
-    document.getElementById('currentProjectDesc').innerText = p.description || '项目协同工作区';
-    const navTabName = document.getElementById('navTabProjectName');
-    if (navTabName) navTabName.innerText = p.name;
+    const titleEl = document.getElementById('currentProjectTitle');
+    if (titleEl) titleEl.innerText = p.name;
+    const descEl = document.getElementById('currentProjectDesc');
+    if (descEl) descEl.innerText = p.description || '项目协同工作区';
   }
 
   document.querySelectorAll('.project-item').forEach(el => {
