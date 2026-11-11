@@ -6,14 +6,14 @@ let g_topTabProjectIds = [];
 let g_members = [];
 let g_currentFilterDate = 'today';
 let g_isPrivate = false;
-let g_currentViewMode = localStorage.getItem('app_view_mode') || 'workflow';
+let g_currentViewMode = localStorage.getItem('app_view_mode') || 'calendar';
 let g_calYear = new Date().getFullYear();
 let g_calMonth = new Date().getMonth(); // 0 - 11
 let g_selectedDayDateStr = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
   initEventListeners();
-  const savedViewMode = localStorage.getItem('app_view_mode') || 'workflow';
+  const savedViewMode = localStorage.getItem('app_view_mode') || 'calendar';
   setViewMode(savedViewMode, false);
   await loadCurrentUser();
   await loadProjects();

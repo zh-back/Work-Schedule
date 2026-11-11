@@ -145,16 +145,9 @@
             <p id="currentProjectDesc" class="project-subtitle">项目协同工作区</p>
           </div>
 
-          <!-- 模式快速切换药丸 (工作流 / 全景日历) -->
+          <!-- 模式快速切换药丸 (全景日历 / 工作流) -->
           <div class="view-mode-pill-toggle">
-            <button type="button" class="view-mode-pill-btn active" id="viewBtnWorkflow" data-mode="workflow" title="切换到双栏待办工作流">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="18" rx="1"></rect>
-                <rect x="14" y="3" width="7" height="18" rx="1"></rect>
-              </svg>
-              <span>工作流</span>
-            </button>
-            <button type="button" class="view-mode-pill-btn" id="viewBtnCalendar" data-mode="calendar" title="切换到全景日历看板模式">
+            <button type="button" class="view-mode-pill-btn active" id="viewBtnCalendar" data-mode="calendar" title="全景日历看板模式">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -162,6 +155,13 @@
                 <line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
               <span>全景日历</span>
+            </button>
+            <button type="button" class="view-mode-pill-btn" id="viewBtnWorkflow" data-mode="workflow" title="切换到双栏待办工作流">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="18" rx="1"></rect>
+              </svg>
+              <span>工作流</span>
             </button>
           </div>
 
@@ -172,7 +172,7 @@
         </div>
 
         <!-- 视图一：经典双栏工作流模式 -->
-        <div id="classicWorkflowView" class="view-mode-container">
+        <div id="classicWorkflowView" class="view-mode-container hidden">
           <!-- 仿 Apifox 请求栏的一体化快速录入卡片 -->
           <div class="quick-input-card">
             <div class="input-row-apifox">
@@ -260,7 +260,7 @@
         </div>
 
         <!-- 视图二：全景日历看板模式 (Full-page Calendar View) -->
-        <div id="calendarBoardView" class="view-mode-container hidden">
+        <div id="calendarBoardView" class="view-mode-container">
           <!-- 日历操作工具栏 -->
           <div class="cal-toolbar">
             <div class="cal-tool-left">
@@ -439,7 +439,7 @@
             <h4 class="settings-section-title">界面视图模式</h4>
             <div class="view-mode-cards-grid">
               <!-- 1. 经典双栏工作流 -->
-              <div class="view-mode-card active" data-mode="workflow" title="经典双栏工作流模式">
+              <div class="view-mode-card" data-mode="workflow" title="经典双栏工作流模式">
                 <div class="view-mode-preview preview-mode-workflow">
                   <div class="vprev-top-bar"></div>
                   <div class="vprev-cols-wrap">
@@ -459,7 +459,7 @@
                 </div>
               </div>
               <!-- 2. 全景日历看板 -->
-              <div class="view-mode-card" data-mode="calendar" title="全景日历看板模式">
+              <div class="view-mode-card active" data-mode="calendar" title="全景日历看板模式">
                 <div class="view-mode-preview preview-mode-calendar">
                   <div class="vprev-cal-header-bar"></div>
                   <div class="vprev-cal-cells-grid">
