@@ -18,11 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Make build script executable
-        run: chmod +x scripts/build_mac.sh
-
       - name: Build macOS App and DMG Installer
-        run: ./scripts/build_mac.sh
+        run: |
+          sed -i '' 's/\r$//' scripts/build_mac.sh || true
+          chmod +x scripts/build_mac.sh
+          bash scripts/build_mac.sh
 
       - name: Upload DMG to Actions Artifacts
         uses: actions/upload-artifact@v4

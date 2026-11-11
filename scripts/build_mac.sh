@@ -13,9 +13,10 @@ DMG_NAME="ScheduleWorklog-v1.0.0-mac.dmg"
 mkdir -p "${DIST_DIR}"
 rm -rf "${APP_BUNDLE}"
 
-# 1. Compile macOS native Cocoa + WKWebView executable
+# 1. Compile macOS native Cocoa + WKWebView universal executable
 echo "[1/4] Compiling macOS native binary..."
-clang -O2 \
+clang -O2 -fobjc-arc \
+  -arch arm64 -arch x86_64 \
   src/common.c \
   src/db.c \
   src/item.c \
