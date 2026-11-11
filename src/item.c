@@ -341,7 +341,7 @@ int item_list_today_dones(const char *project_id, const char *user_id, ItemList 
     int64_t now = get_current_timestamp_ms();
     time_t sec = (time_t)(now / 1000LL);
     struct tm l_tm;
-    localtime_s(&l_tm, &sec);
+    PORTABLE_LOCALTIME(&l_tm, &sec);
     l_tm.tm_hour = 0;
     l_tm.tm_min = 0;
     l_tm.tm_sec = 0;

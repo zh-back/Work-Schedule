@@ -29,6 +29,7 @@ clang -O2 -fobjc-arc \
   -framework Cocoa \
   -framework WebKit \
   -lpthread \
+  -ldl \
   -o "${APP_NAME}"
 
 # 2. Package macOS .app bundle

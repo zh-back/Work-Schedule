@@ -301,11 +301,7 @@ static void handle_client(SOCKET client) {
         int64_t now_ms = get_current_timestamp_ms();
         time_t sec = (time_t)(now_ms / 1000LL);
         struct tm l_tm;
-#ifdef _WIN32
-        localtime_s(&l_tm, &sec);
-#else
-        localtime_r(&sec, &l_tm);
-#endif
+        PORTABLE_LOCALTIME(&l_tm, &sec);
 
         if (strcmp(date_param, "all") == 0) {
             start_ms = 0;

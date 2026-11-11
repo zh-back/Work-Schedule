@@ -9,7 +9,7 @@
 void summary_get_current_week(int *out_year, int *out_week) {
     time_t now = time(NULL);
     struct tm t;
-    localtime_s(&t, &now);
+    PORTABLE_LOCALTIME(&t, &now);
 
     char buf[16];
     strftime(buf, sizeof(buf), "%Y", &t);
@@ -30,7 +30,7 @@ int summary_get_week_range(int year, int week_num, int64_t *out_start_ms, int64_
     time_t t_jan4 = mktime(&tm_first);
 
     struct tm tm_jan4;
-    localtime_s(&tm_jan4, &t_jan4);
+    PORTABLE_LOCALTIME(&tm_jan4, &t_jan4);
 
     // Days since Monday (0 for Mon, 6 for Sun)
     int day_of_week = (tm_jan4.tm_wday + 6) % 7;

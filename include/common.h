@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <time.h>
+
+#ifdef _WIN32
+#define PORTABLE_LOCALTIME(tm_ptr, time_t_ptr) localtime_s((tm_ptr), (time_t_ptr))
+#else
+#define PORTABLE_LOCALTIME(tm_ptr, time_t_ptr) localtime_r((time_t_ptr), (tm_ptr))
+#endif
 
 #define UUID_STR_LEN 37 // 36 chars + null terminator
 
