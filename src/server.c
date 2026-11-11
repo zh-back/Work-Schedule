@@ -110,6 +110,17 @@ static int get_json_int(const char *body, const char *key, int default_val) {
     return atoi(p);
 }
 
+static int64_t get_json_int64(const char *body, const char *key, int64_t default_val) {
+    if (!body || !key) return default_val;
+    char pattern[128];
+    snprintf(pattern, sizeof(pattern), "\"%s\"", key);
+    const char *p = strstr(body, pattern);
+    if (!p) return default_val;
+    p += strlen(pattern);
+    while (*p && (*p == ' ' || *p == ':')) p++;
+    return _strtoi64(p, NULL, 10);
+}
+
 static void send_http_response(SOCKET sock, int status_code, const char *content_type, const char *body) {
     char header[512];
     size_t body_len = body ? strlen(body) : 0;
@@ -331,8 +342,8 @@ static void handle_client(SOCKET client) {
             char escaped_c[1024];
             json_escape(todos.items[i].content, escaped_c, sizeof(escaped_c));
             char itm[2048];
-            int n = snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"visibility\":\"%s\",\"tags\":\"%s\"}",
-                             i > 0 ? "," : "", todos.items[i].id, escaped_c, todos.items[i].creator_name, todos.items[i].visibility, todos.items[i].tags);
+            int n = snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"visibility\":\"%s\",\"tags\":\"%s\",\"created_at\":%lld}",
+                             i > 0 ? "," : "", todos.items[i].id, escaped_c, todos.items[i].creator_name, todos.items[i].visibility, todos.items[i].tags, (long long)todos.items[i].created_at);
             if (resp_len + (size_t)n + 2048 > buf_cap) {
                 buf_cap *= 2;
                 char *new_resp = (char*)realloc(resp, buf_cap);
@@ -346,8 +357,8 @@ static void handle_client(SOCKET client) {
             char escaped_c[1024];
             json_escape(dones.items[i].content, escaped_c, sizeof(escaped_c));
             char itm[2048];
-            int n = snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"completed_at\":%lld,\"visibility\":\"%s\",\"tags\":\"%s\"}",
-                             i > 0 ? "," : "", dones.items[i].id, escaped_c, dones.items[i].creator_name, (long long)dones.items[i].completed_at, dones.items[i].visibility, dones.items[i].tags);
+            int n = snprintf(itm, sizeof(itm), "%s{\"id\":\"%s\",\"content\":\"%s\",\"creator_name\":\"%s\",\"completed_at\":%lld,\"created_at\":%lld,\"visibility\":\"%s\",\"tags\":\"%s\"}",
+                             i > 0 ? "," : "", dones.items[i].id, escaped_c, dones.items[i].creator_name, (long long)dones.items[i].completed_at, (long long)dones.items[i].created_at, dones.items[i].visibility, dones.items[i].tags);
             if (resp_len + (size_t)n + 2048 > buf_cap) {
                 buf_cap *= 2;
                 char *new_resp = (char*)realloc(resp, buf_cap);
@@ -372,13 +383,14 @@ static void handle_client(SOCKET client) {
         get_json_str(body, "content", content, sizeof(content));
         int is_done = get_json_int(body, "is_done", 0);
         int is_private = get_json_int(body, "is_private", 0);
+        int64_t created_at = get_json_int64(body, "created_at", 0);
 
         char new_id[UUID_STR_LEN];
         int rc;
         if (is_done) {
-            rc = item_create_done(proj_id, user_id, content, is_private, new_id);
+            rc = item_create_done_ext(proj_id, user_id, content, is_private, created_at, created_at, new_id);
         } else {
-            rc = item_create_todo(proj_id, user_id, content, is_private, new_id);
+            rc = item_create_todo_ext(proj_id, user_id, content, is_private, created_at, new_id);
         }
         char resp[256];
         snprintf(resp, sizeof(resp), "{\"success\":%s,\"id\":\"%s\"}", rc == 0 ? "true" : "false", new_id);

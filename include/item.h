@@ -33,8 +33,14 @@ typedef struct {
 // Quickly create a completed item (auto timestamped with current time)
 int item_create_done(const char *project_id, const char *user_id, const char *content, int is_private, char *out_item_id);
 
+// Create a completed item with custom timestamps
+int item_create_done_ext(const char *project_id, const char *user_id, const char *content, int is_private, int64_t created_at, int64_t completed_at, char *out_item_id);
+
 // Create a todo item
 int item_create_todo(const char *project_id, const char *user_id, const char *content, int is_private, char *out_item_id);
+
+// Create a todo item with custom created_at timestamp (0 for current time)
+int item_create_todo_ext(const char *project_id, const char *user_id, const char *content, int is_private, int64_t created_at, char *out_item_id);
 
 // Mark a todo item as completed (records current timestamp as completed_at)
 int item_mark_done(const char *item_id);

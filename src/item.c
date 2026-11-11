@@ -39,7 +39,7 @@ void extract_tags_from_content(const char *content, char *out_tags, size_t max_l
     }
 }
 
-int item_create_done(const char *project_id, const char *user_id, const char *content, int is_private, char *out_item_id) {
+int item_create_done_ext(const char *project_id, const char *user_id, const char *content, int is_private, int64_t created_at, int64_t completed_at, char *out_item_id) {
     if (!project_id || !user_id || !content || strlen(content) == 0) return -1;
     sqlite3 *db = db_get_handle();
     if (!db) return -1;
@@ -47,6 +47,8 @@ int item_create_done(const char *project_id, const char *user_id, const char *co
     char item_id[UUID_STR_LEN];
     generate_uuid_v4(item_id);
     int64_t now = get_current_timestamp_ms();
+    int64_t c_at = (created_at > 0) ? created_at : now;
+    int64_t comp_at = (completed_at > 0) ? completed_at : now;
 
     char tags[256];
     extract_tags_from_content(content, tags, sizeof(tags));
@@ -65,10 +67,10 @@ int item_create_done(const char *project_id, const char *user_id, const char *co
     sqlite3_bind_text(stmt, 2, project_id, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, user_id, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, content, -1, SQLITE_STATIC);
-    sqlite3_bind_int64(stmt, 5, now); // completed_at
+    sqlite3_bind_int64(stmt, 5, comp_at); // completed_at
     sqlite3_bind_text(stmt, 6, vis, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 7, tags, -1, SQLITE_STATIC);
-    sqlite3_bind_int64(stmt, 8, now);
+    sqlite3_bind_int64(stmt, 8, c_at);
     sqlite3_bind_int64(stmt, 9, now);
 
     rc = sqlite3_step(stmt);
@@ -81,7 +83,11 @@ int item_create_done(const char *project_id, const char *user_id, const char *co
     return 0;
 }
 
-int item_create_todo(const char *project_id, const char *user_id, const char *content, int is_private, char *out_item_id) {
+int item_create_done(const char *project_id, const char *user_id, const char *content, int is_private, char *out_item_id) {
+    return item_create_done_ext(project_id, user_id, content, is_private, 0, 0, out_item_id);
+}
+
+int item_create_todo_ext(const char *project_id, const char *user_id, const char *content, int is_private, int64_t created_at, char *out_item_id) {
     if (!project_id || !user_id || !content || strlen(content) == 0) return -1;
     sqlite3 *db = db_get_handle();
     if (!db) return -1;
@@ -89,6 +95,7 @@ int item_create_todo(const char *project_id, const char *user_id, const char *co
     char item_id[UUID_STR_LEN];
     generate_uuid_v4(item_id);
     int64_t now = get_current_timestamp_ms();
+    int64_t c_at = (created_at > 0) ? created_at : now;
 
     char tags[256];
     extract_tags_from_content(content, tags, sizeof(tags));
@@ -109,7 +116,7 @@ int item_create_todo(const char *project_id, const char *user_id, const char *co
     sqlite3_bind_text(stmt, 4, content, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 5, vis, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 6, tags, -1, SQLITE_STATIC);
-    sqlite3_bind_int64(stmt, 7, now);
+    sqlite3_bind_int64(stmt, 7, c_at);
     sqlite3_bind_int64(stmt, 8, now);
 
     rc = sqlite3_step(stmt);
@@ -120,6 +127,10 @@ int item_create_todo(const char *project_id, const char *user_id, const char *co
         strncpy(out_item_id, item_id, UUID_STR_LEN);
     }
     return 0;
+}
+
+int item_create_todo(const char *project_id, const char *user_id, const char *content, int is_private, char *out_item_id) {
+    return item_create_todo_ext(project_id, user_id, content, is_private, 0, out_item_id);
 }
 
 int item_mark_done(const char *item_id) {

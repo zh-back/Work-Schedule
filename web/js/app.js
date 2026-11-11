@@ -6,9 +6,15 @@ let g_topTabProjectIds = [];
 let g_members = [];
 let g_currentFilterDate = 'today';
 let g_isPrivate = false;
+let g_currentViewMode = localStorage.getItem('app_view_mode') || 'workflow';
+let g_calYear = new Date().getFullYear();
+let g_calMonth = new Date().getMonth(); // 0 - 11
+let g_selectedDayDateStr = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
   initEventListeners();
+  const savedViewMode = localStorage.getItem('app_view_mode') || 'workflow';
+  setViewMode(savedViewMode, false);
   await loadCurrentUser();
   await loadProjects();
 });
@@ -371,6 +377,80 @@ function initEventListeners() {
 
   document.querySelectorAll('.settings-nav-item').forEach(item => {
     item.addEventListener('click', () => switchSettingsTab(item.dataset.tab));
+  });
+
+  // 0. 界面视图模式切换 (经典双栏工作流 / 全景日历看板)
+  document.querySelectorAll('.view-mode-pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setViewMode(btn.dataset.mode);
+    });
+  });
+
+  document.querySelectorAll('.view-mode-card').forEach(card => {
+    card.addEventListener('click', () => {
+      setViewMode(card.dataset.mode);
+    });
+  });
+
+  // 日历工具栏与月份切换
+  safeListen('btnCalNewItem', 'click', () => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    openCalNewItemModal(todayStr);
+  });
+
+  safeListen('btnCalToday', 'click', () => {
+    const now = new Date();
+    g_calYear = now.getFullYear();
+    g_calMonth = now.getMonth();
+    renderCalendarBoard();
+  });
+
+  safeListen('btnCalPrevMonth', 'click', () => {
+    g_calMonth--;
+    if (g_calMonth < 0) {
+      g_calMonth = 11;
+      g_calYear--;
+    }
+    renderCalendarBoard();
+  });
+
+  safeListen('btnCalNextMonth', 'click', () => {
+    g_calMonth++;
+    if (g_calMonth > 11) {
+      g_calMonth = 0;
+      g_calYear++;
+    }
+    renderCalendarBoard();
+  });
+
+  // 日历新建日程弹窗
+  safeListen('closeCalItemModal', 'click', closeCalItemModal);
+  safeListen('cancelCalItemBtn', 'click', closeCalItemModal);
+  safeListen('submitCalItemBtn', 'click', handleCalCreateItem);
+  safeListen('calItemContentInput', 'keydown', (e) => {
+    if (e.isComposing) return;
+    if (e.key === 'Enter') handleCalCreateItem();
+  });
+
+  document.querySelectorAll('.cal-tag-shortcuts .shortcut-tag').forEach(tagEl => {
+    tagEl.onclick = () => {
+      const input = document.getElementById('calItemContentInput');
+      const tag = tagEl.dataset.tag;
+      if (input && !input.value.includes(tag)) {
+        input.value = (input.value.trim() + ' ' + tag).trim();
+        input.focus();
+      }
+    };
+  });
+
+  // 单日详情弹窗
+  safeListen('closeDayDetailModal', 'click', closeDayDetailModal);
+  safeListen('closeDayDetailBtn', 'click', closeDayDetailModal);
+  safeListen('dayQuickAddBtn', 'click', handleDayQuickAdd);
+  safeListen('dayQuickAddInput', 'keydown', (e) => {
+    if (e.isComposing) return;
+    if (e.key === 'Enter') handleDayQuickAdd();
   });
 
   // 1. 背景预设切换
@@ -937,7 +1017,11 @@ async function selectProject(projId) {
   }
 
   try {
-    await loadItems();
+    if (g_currentViewMode === 'calendar') {
+      await renderCalendarBoard();
+    } else {
+      await loadItems();
+    }
   } catch (e) {
     console.error('loadItems error:', e);
   }
@@ -985,6 +1069,9 @@ async function loadMembers() {
 }
 
 async function loadItems() {
+  if (g_currentViewMode === 'calendar') {
+    return renderCalendarBoard();
+  }
   if (!g_currentProjectId || !g_currentUserId) return;
   const res = await fetch(`/api/items?project_id=${g_currentProjectId}&user_id=${g_currentUserId}&date=${encodeURIComponent(g_currentFilterDate)}`);
   if (!res.ok) return;
@@ -1230,4 +1317,485 @@ function formatTime(tsMs, showDate = false) {
 function escapeHtml(str) {
   if (!str) return '';
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ==========================================================================
+// 界面视图模式 (View Mode Toggle & Full Calendar Board Controller)
+// ==========================================================================
+
+function setViewMode(mode, save = true) {
+  g_currentViewMode = mode;
+  if (save) localStorage.setItem('app_view_mode', mode);
+
+  const workflowView = document.getElementById('classicWorkflowView');
+  const calendarView = document.getElementById('calendarBoardView');
+  if (workflowView) workflowView.classList.toggle('hidden', mode !== 'workflow');
+  if (calendarView) calendarView.classList.toggle('hidden', mode !== 'calendar');
+
+  // 同步顶栏切换药丸
+  document.querySelectorAll('.view-mode-pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+
+  // 同步外观设置弹窗内的模式卡片
+  document.querySelectorAll('.view-mode-card').forEach(card => {
+    card.classList.toggle('active', card.dataset.mode === mode);
+  });
+
+  if (mode === 'calendar') {
+    renderCalendarBoard();
+  } else {
+    loadItems();
+  }
+}
+
+// 农历日期计算 (基于 Intl.DateTimeFormat 原生天文算法)
+function getLunarDayText(date) {
+  try {
+    const fDay = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { day: 'numeric' });
+    const fMonth = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { month: 'long' });
+    const dStr = fDay.format(date).replace(/\D/g, '');
+    const d = parseInt(dStr, 10);
+    if (d === 1) {
+      return fMonth.format(date).replace(/月.+/, '月');
+    }
+    const CHN_DAYS = ['', '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                      '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                      '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+    return CHN_DAYS[d] || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function toLocalDateKey(ts) {
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+let g_cachedCalendarData = null;
+
+async function renderCalendarBoard() {
+  if (!g_currentProjectId || !g_currentUserId) return;
+
+  const monthLabel = document.getElementById('calCurrentMonthLabel');
+  if (monthLabel) {
+    monthLabel.innerText = `${g_calYear}年${g_calMonth + 1}月`;
+  }
+
+  const res = await fetch(`/api/items?project_id=${g_currentProjectId}&user_id=${g_currentUserId}&date=all`);
+  if (!res.ok) return;
+  const data = await res.json();
+  g_cachedCalendarData = data;
+
+  const todos = data.todos || [];
+  const dones = data.dones || [];
+
+  const itemsByDate = {};
+  let monthTodoCount = 0;
+  let monthDoneCount = 0;
+
+  const curMonthPrefix = `${g_calYear}-${String(g_calMonth + 1).padStart(2, '0')}`;
+
+  todos.forEach(item => {
+    const key = item.created_at ? toLocalDateKey(item.created_at) : toLocalDateKey(Date.now());
+    if (!itemsByDate[key]) itemsByDate[key] = { todos: [], dones: [] };
+    itemsByDate[key].todos.push(item);
+    if (key.startsWith(curMonthPrefix)) monthTodoCount++;
+  });
+
+  dones.forEach(item => {
+    const key = item.completed_at ? toLocalDateKey(item.completed_at) : (item.created_at ? toLocalDateKey(item.created_at) : toLocalDateKey(Date.now()));
+    if (!itemsByDate[key]) itemsByDate[key] = { todos: [], dones: [] };
+    itemsByDate[key].dones.push(item);
+    if (key.startsWith(curMonthPrefix)) monthDoneCount++;
+  });
+
+  // 更新顶栏统计徽章
+  const todoPill = document.getElementById('todoCountPill');
+  const donePill = document.getElementById('doneCountPill');
+  if (todoPill) todoPill.innerText = `待办: ${todos.length}`;
+  if (donePill) donePill.innerText = `本月完成: ${monthDoneCount}`;
+
+  const calMonthTodoCount = document.getElementById('calMonthTodoCount');
+  const calMonthDoneCount = document.getElementById('calMonthDoneCount');
+  if (calMonthTodoCount) calMonthTodoCount.innerText = `本月待办: ${monthTodoCount}`;
+  if (calMonthDoneCount) calMonthDoneCount.innerText = `本月完成: ${monthDoneCount}`;
+
+  const gridBody = document.getElementById('calendarGridBody');
+  if (!gridBody) return;
+  gridBody.innerHTML = '';
+
+  const firstDayOfMonth = new Date(g_calYear, g_calMonth, 1);
+  const startDayOfWeek = firstDayOfMonth.getDay(); // 0 是周日
+  const daysInMonth = new Date(g_calYear, g_calMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(g_calYear, g_calMonth, 0).getDate();
+
+  const todayKey = toLocalDateKey(Date.now());
+  const totalCells = (startDayOfWeek + daysInMonth > 35) ? 42 : 35;
+
+  for (let i = 0; i < totalCells; i++) {
+    let cellYear = g_calYear;
+    let cellMonth = g_calMonth;
+    let cellDay = 1;
+    let isOtherMonth = false;
+
+    if (i < startDayOfWeek) {
+      isOtherMonth = true;
+      cellMonth = g_calMonth - 1;
+      if (cellMonth < 0) {
+        cellMonth = 11;
+        cellYear -= 1;
+      }
+      cellDay = daysInPrevMonth - startDayOfWeek + 1 + i;
+    } else if (i >= startDayOfWeek + daysInMonth) {
+      isOtherMonth = true;
+      cellMonth = g_calMonth + 1;
+      if (cellMonth > 11) {
+        cellMonth = 0;
+        cellYear += 1;
+      }
+      cellDay = i - (startDayOfWeek + daysInMonth) + 1;
+    } else {
+      cellDay = i - startDayOfWeek + 1;
+    }
+
+    const cellDate = new Date(cellYear, cellMonth, cellDay);
+    const cellDateKey = `${cellYear}-${String(cellMonth + 1).padStart(2, '0')}-${String(cellDay).padStart(2, '0')}`;
+    const isToday = (cellDateKey === todayKey);
+
+    const cellEl = document.createElement('div');
+    cellEl.className = `cal-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'is-today is-today-cell' : ''}`;
+    cellEl.dataset.date = cellDateKey;
+
+    const lunarText = getLunarDayText(cellDate);
+    const isFirstDay = (cellDay === 1);
+    const monthTag = isFirstDay ? `<span class="cal-cell-month-badge">${cellMonth + 1}月</span>` : '';
+
+    const cellHeaderHtml = `
+      <div class="cal-cell-header">
+        <div class="cal-cell-date-info">
+          <span class="cal-cell-day-num">${cellDay}</span>
+          ${monthTag}
+          <span class="cal-cell-lunar">${escapeHtml(lunarText)}</span>
+        </div>
+        <button class="cal-cell-add-btn" title="为此日添加日程">+</button>
+      </div>
+    `;
+
+    const dayItems = itemsByDate[cellDateKey] || { todos: [], dones: [] };
+    const allItems = [
+      ...dayItems.todos.map(t => ({ ...t, is_done: false })),
+      ...dayItems.dones.map(d => ({ ...d, is_done: true }))
+    ];
+
+    const MAX_VISIBLE = 3;
+    let tasksHtml = '<div class="cal-cell-tasks">';
+    const visibleItems = allItems.slice(0, MAX_VISIBLE);
+
+    visibleItems.forEach(item => {
+      const timeStr = item.completed_at ? formatTime(item.completed_at, false) : '';
+      tasksHtml += `
+        <div class="cal-task-chip ${item.is_done ? 'is-done' : 'is-todo'}" data-id="${item.id}" title="${escapeHtml(item.content)}">
+          <input type="checkbox" ${item.is_done ? 'checked' : ''} data-id="${item.id}" title="${item.is_done ? '转为待办' : '打勾完成'}">
+          <span class="cal-task-text">${escapeHtml(item.content)}</span>
+          ${timeStr ? `<span class="cal-task-time">${timeStr}</span>` : ''}
+          <button class="cal-task-del" data-id="${item.id}" title="删除">✕</button>
+        </div>
+      `;
+    });
+
+    if (allItems.length > MAX_VISIBLE) {
+      const moreCount = allItems.length - MAX_VISIBLE;
+      tasksHtml += `<div class="cal-more-pill" data-date="${cellDateKey}">+${moreCount} 更多</div>`;
+    }
+    tasksHtml += '</div>';
+
+    cellEl.innerHTML = cellHeaderHtml + tasksHtml;
+
+    // 添加事件绑定
+    const addBtn = cellEl.querySelector('.cal-cell-add-btn');
+    if (addBtn) {
+      addBtn.onclick = (e) => {
+        e.stopPropagation();
+        openCalNewItemModal(cellDateKey);
+      };
+    }
+
+    cellEl.querySelectorAll('.cal-task-chip input[type="checkbox"]').forEach(chk => {
+      chk.onclick = async (e) => {
+        e.stopPropagation();
+        const id = chk.dataset.id;
+        if (chk.checked) {
+          await markItemDone(id);
+        } else {
+          await markItemTodo(id);
+        }
+        await renderCalendarBoard();
+      };
+    });
+
+    cellEl.querySelectorAll('.cal-task-del').forEach(delBtn => {
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        const id = delBtn.dataset.id;
+        deleteItem(id, '选中的日程事项');
+      };
+    });
+
+    cellEl.querySelectorAll('.cal-task-chip').forEach(chip => {
+      chip.onclick = (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.classList.contains('cal-task-del')) return;
+        openDayDetailModal(cellDateKey, dayItems);
+      };
+    });
+
+    const morePill = cellEl.querySelector('.cal-more-pill');
+    if (morePill) {
+      morePill.onclick = (e) => {
+        e.stopPropagation();
+        openDayDetailModal(cellDateKey, dayItems);
+      };
+    }
+
+    cellEl.ondblclick = (e) => {
+      if (e.target.closest('.cal-task-chip, .cal-more-pill, .cal-cell-add-btn')) return;
+      openCalNewItemModal(cellDateKey);
+    };
+
+    gridBody.appendChild(cellEl);
+  }
+}
+
+// 新建日程弹窗控制
+function openCalNewItemModal(dateStr) {
+  const modal = document.getElementById('calendarNewItemModal');
+  const dateInput = document.getElementById('calItemDateInput');
+  const contentInput = document.getElementById('calItemContentInput');
+  if (!modal) return;
+
+  const targetDate = dateStr || toLocalDateKey(Date.now());
+  if (dateInput) dateInput.value = targetDate;
+  if (contentInput) {
+    contentInput.value = '';
+    contentInput.classList.remove('error');
+  }
+
+  const defaultTodoRadio = document.querySelector('input[name="calItemStatus"][value="todo"]');
+  if (defaultTodoRadio) defaultTodoRadio.checked = true;
+
+  modal.classList.remove('hidden');
+  setTimeout(() => { if (contentInput) contentInput.focus(); }, 60);
+}
+
+function closeCalItemModal() {
+  const modal = document.getElementById('calendarNewItemModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function handleCalCreateItem() {
+  const dateInput = document.getElementById('calItemDateInput');
+  const contentInput = document.getElementById('calItemContentInput');
+  const content = contentInput ? contentInput.value.trim() : '';
+  if (!content) {
+    if (contentInput) contentInput.focus();
+    return;
+  }
+
+  const dateStr = dateInput ? dateInput.value : toLocalDateKey(Date.now());
+  const statusRadio = document.querySelector('input[name="calItemStatus"]:checked');
+  const isDone = (statusRadio && statusRadio.value === 'done');
+  const visRadio = document.querySelector('input[name="calItemVis"]:checked');
+  const isPrivate = (visRadio && visRadio.value === 'private') ? 1 : 0;
+
+  // 计算时间戳
+  let created_at = 0;
+  if (dateStr === toLocalDateKey(Date.now())) {
+    created_at = Date.now();
+  } else {
+    created_at = new Date(`${dateStr}T12:00:00`).getTime();
+  }
+
+  const btn = document.getElementById('submitCalItemBtn');
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        project_id: g_currentProjectId,
+        user_id: g_currentUserId,
+        content: content,
+        is_done: isDone ? 1 : 0,
+        is_private: isPrivate,
+        created_at: created_at
+      })
+    });
+
+    if (res.ok) {
+      closeCalItemModal();
+      if (g_currentViewMode === 'calendar') {
+        await renderCalendarBoard();
+      } else {
+        await loadItems();
+      }
+    }
+  } catch (err) {
+    console.error('handleCalCreateItem error:', err);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// 单日详情弹窗控制
+function openDayDetailModal(dateStr, dayItems) {
+  g_selectedDayDateStr = dateStr;
+  const modal = document.getElementById('calendarDayDetailModal');
+  if (!modal) return;
+
+  const dateObj = new Date(dateStr);
+  const lunarText = getLunarDayText(dateObj);
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const weekdayName = weekdays[dateObj.getDay()] || '';
+
+  const titleEl = document.getElementById('dayDetailTitle');
+  const subTitleEl = document.getElementById('dayDetailSubtitle');
+  if (titleEl) titleEl.innerText = `${dateStr} 事项清单 (${weekdayName})`;
+  if (subTitleEl) subTitleEl.innerText = lunarText ? `农历 ${lunarText}` : '';
+
+  renderDayDetailModalLists(dayItems);
+  modal.classList.remove('hidden');
+
+  const quickInput = document.getElementById('dayQuickAddInput');
+  if (quickInput) {
+    quickInput.value = '';
+    setTimeout(() => quickInput.focus(), 60);
+  }
+}
+
+function closeDayDetailModal() {
+  const modal = document.getElementById('calendarDayDetailModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderDayDetailModalLists(dayItems) {
+  const todoList = document.getElementById('dayDetailTodoList');
+  const doneList = document.getElementById('dayDetailDoneList');
+  const todoCountEl = document.getElementById('dayDetailTodoCount');
+  const doneCountEl = document.getElementById('dayDetailDoneCount');
+
+  const todos = (dayItems && dayItems.todos) ? dayItems.todos : [];
+  const dones = (dayItems && dayItems.dones) ? dayItems.dones : [];
+
+  if (todoCountEl) todoCountEl.innerText = todos.length;
+  if (doneCountEl) doneCountEl.innerText = dones.length;
+
+  if (todoList) {
+    todoList.innerHTML = '';
+    if (todos.length === 0) {
+      todoList.innerHTML = '<div class="empty-state">当日暂无待办事项</div>';
+    } else {
+      todos.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'item-card';
+        row.innerHTML = `
+          <input type="checkbox" class="item-checkbox" data-id="${item.id}" title="完成打卡">
+          <div class="item-content">${escapeHtml(item.content)}</div>
+          <button class="btn-icon-delete" title="删除待办" data-id="${item.id}">🗑️</button>
+        `;
+        row.querySelector('.item-checkbox').onclick = async () => {
+          await markItemDone(item.id);
+          await refreshCurrentDayDetail();
+        };
+        row.querySelector('.btn-icon-delete').onclick = async () => {
+          await deleteItem(item.id, item.content);
+          await refreshCurrentDayDetail();
+        };
+        todoList.appendChild(row);
+      });
+    }
+  }
+
+  if (doneList) {
+    doneList.innerHTML = '';
+    if (dones.length === 0) {
+      doneList.innerHTML = '<div class="empty-state">当日暂无已完成记录</div>';
+    } else {
+      dones.forEach(item => {
+        const timeStr = item.completed_at ? formatTime(item.completed_at, false) : '';
+        const row = document.createElement('div');
+        row.className = 'item-card';
+        row.innerHTML = `
+          <input type="checkbox" class="item-checkbox item-checkbox-done" checked data-id="${item.id}" title="转回未完成">
+          <span class="item-time">${timeStr}</span>
+          <div class="item-content">${escapeHtml(item.content)}</div>
+          <button class="btn-icon-undo" title="恢复为待办" data-id="${item.id}">↩</button>
+          <button class="btn-icon-delete" title="删除记录" data-id="${item.id}">🗑️</button>
+        `;
+        row.querySelector('.item-checkbox').onclick = async () => {
+          await markItemTodo(item.id);
+          await refreshCurrentDayDetail();
+        };
+        row.querySelector('.btn-icon-undo').onclick = async () => {
+          await markItemTodo(item.id);
+          await refreshCurrentDayDetail();
+        };
+        row.querySelector('.btn-icon-delete').onclick = async () => {
+          await deleteItem(item.id, item.content);
+          await refreshCurrentDayDetail();
+        };
+        doneList.appendChild(row);
+      });
+    }
+  }
+}
+
+async function refreshCurrentDayDetail() {
+  await renderCalendarBoard();
+  if (g_selectedDayDateStr && g_cachedCalendarData) {
+    const todos = (g_cachedCalendarData.todos || []).filter(item => {
+      const k = item.created_at ? toLocalDateKey(item.created_at) : toLocalDateKey(Date.now());
+      return k === g_selectedDayDateStr;
+    });
+    const dones = (g_cachedCalendarData.dones || []).filter(item => {
+      const k = item.completed_at ? toLocalDateKey(item.completed_at) : (item.created_at ? toLocalDateKey(item.created_at) : toLocalDateKey(Date.now()));
+      return k === g_selectedDayDateStr;
+    });
+    renderDayDetailModalLists({ todos, dones });
+  }
+}
+
+async function handleDayQuickAdd() {
+  const input = document.getElementById('dayQuickAddInput');
+  const content = input ? input.value.trim() : '';
+  if (!content || !g_selectedDayDateStr) return;
+
+  let created_at = 0;
+  if (g_selectedDayDateStr === toLocalDateKey(Date.now())) {
+    created_at = Date.now();
+  } else {
+    created_at = new Date(`${g_selectedDayDateStr}T12:00:00`).getTime();
+  }
+
+  const res = await fetch('/api/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      project_id: g_currentProjectId,
+      user_id: g_currentUserId,
+      content: content,
+      is_done: 0,
+      is_private: 0,
+      created_at: created_at
+    })
+  });
+
+  if (res.ok) {
+    input.value = '';
+    await refreshCurrentDayDetail();
+  }
 }

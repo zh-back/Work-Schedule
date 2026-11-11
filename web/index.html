@@ -135,102 +135,177 @@
 
       <!-- 右侧工作台主体 -->
       <main class="content-area">
-        <!-- 仿 Apifox 请求栏的一体化快速录入卡片 -->
-        <div class="quick-input-card">
-          <div class="input-row-apifox">
-            <div class="input-method-badge">
-              <span class="badge-dot"></span>
-              <span class="badge-text">TODO</span>
-            </div>
-            <input type="text" id="taskInput" class="task-text-input" placeholder="输入待办事项或计划要做的工作... (支持 #标签)" autocomplete="off">
-            <button id="btnCreateTodo" class="btn btn-apifox-primary">
-              <span class="btn-icon-plus">+</span>
-              <span>加入待办</span>
-            </button>
-          </div>
-          <div class="quick-tips-bar">
-            <div class="quick-tips">
-              <span class="tips-label">快捷标签：</span>
-              <div class="tag-shortcuts">
-                <span class="shortcut-tag" data-tag="#需求开发">#需求开发</span>
-                <span class="shortcut-tag" data-tag="#Bug修复">#Bug修复</span>
-                <span class="shortcut-tag" data-tag="#方案评审">#方案评审</span>
-                <span class="shortcut-tag" data-tag="#性能优化">#性能优化</span>
-              </div>
-            </div>
-            <button type="button" id="visibilityToggleBtn" class="visibility-subtle-toggle" title="点击切换：公开 / 仅自己可见">
-              <span id="visStatusIcon">🌐</span>
-              <span id="visStatusLabel">项目公开</span>
-            </button>
-          </div>
-        </div>
-
         <!-- 当前活动项目标题与视图切换 -->
         <div class="workspace-header">
-          <div>
+          <div class="workspace-title-wrap">
             <div class="project-heading-row">
               <h2 id="currentProjectTitle">Bytesforce</h2>
               <span class="project-status-dot"></span>
             </div>
             <p id="currentProjectDesc" class="project-subtitle">项目协同工作区</p>
           </div>
+
+          <!-- 模式快速切换药丸 (工作流 / 全景日历) -->
+          <div class="view-mode-pill-toggle">
+            <button type="button" class="view-mode-pill-btn active" id="viewBtnWorkflow" data-mode="workflow" title="切换到双栏待办工作流">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="18" rx="1"></rect>
+              </svg>
+              <span>工作流</span>
+            </button>
+            <button type="button" class="view-mode-pill-btn" id="viewBtnCalendar" data-mode="calendar" title="切换到全景日历看板模式">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>全景日历</span>
+            </button>
+          </div>
+
           <div class="stats-pills">
             <span class="pill pill-todo" id="todoCountPill">待办: 0</span>
             <span class="pill pill-done" id="doneCountPill">今日完成: 0</span>
           </div>
         </div>
 
-        <!-- 双栏待办与已完成流水 -->
-        <div class="columns-grid">
-          <!-- 左栏：待办列表 -->
-          <div class="panel panel-todo">
-            <div class="panel-header">
-              <div class="panel-header-title">
-                <span class="panel-tag-badge todo-tag">待办</span>
-                <h3>待办事项 (To-Do)</h3>
+        <!-- 视图一：经典双栏工作流模式 -->
+        <div id="classicWorkflowView" class="view-mode-container">
+          <!-- 仿 Apifox 请求栏的一体化快速录入卡片 -->
+          <div class="quick-input-card">
+            <div class="input-row-apifox">
+              <div class="input-method-badge">
+                <span class="badge-dot"></span>
+                <span class="badge-text">TODO</span>
               </div>
-              <span class="panel-tip">做完打勾自动归档</span>
+              <input type="text" id="taskInput" class="task-text-input" placeholder="输入待办事项或计划要做的工作... (支持 #标签)" autocomplete="off">
+              <button id="btnCreateTodo" class="btn btn-apifox-primary">
+                <span class="btn-icon-plus">+</span>
+                <span>加入待办</span>
+              </button>
             </div>
-            <div id="todoListContainer" class="items-list">
-              <div class="empty-state">暂无待办事项，输入上方事项添加</div>
+            <div class="quick-tips-bar">
+              <div class="quick-tips">
+                <span class="tips-label">快捷标签：</span>
+                <div class="tag-shortcuts">
+                  <span class="shortcut-tag" data-tag="#需求开发">#需求开发</span>
+                  <span class="shortcut-tag" data-tag="#Bug修复">#Bug修复</span>
+                  <span class="shortcut-tag" data-tag="#方案评审">#方案评审</span>
+                  <span class="shortcut-tag" data-tag="#性能优化">#性能优化</span>
+                </div>
+              </div>
+              <button type="button" id="visibilityToggleBtn" class="visibility-subtle-toggle" title="点击切换：公开 / 仅自己可见">
+                <span id="visStatusIcon">🌐</span>
+                <span id="visStatusLabel">项目公开</span>
+              </button>
             </div>
           </div>
 
-          <!-- 右栏：已完成时间轴与历史日期回溯 -->
-          <div class="panel panel-done">
-            <div class="panel-header">
-              <div class="panel-header-title">
-                <span class="panel-tag-badge done-tag">完成</span>
-                <h3 id="donePanelTitle">今日已完成</h3>
+          <!-- 双栏待办与已完成流水 -->
+          <div class="columns-grid">
+            <!-- 左栏：待办列表 -->
+            <div class="panel panel-todo">
+              <div class="panel-header">
+                <div class="panel-header-title">
+                  <span class="panel-tag-badge todo-tag">待办</span>
+                  <h3>待办事项 (To-Do)</h3>
+                </div>
+                <span class="panel-tip">做完打勾自动归档</span>
               </div>
-              <div class="date-navigator">
-                <button class="date-step-btn" id="prevDayBtn" title="前一天">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
-                <div class="segmented-control">
-                  <button class="seg-btn active" data-date="today">今天</button>
-                  <button class="seg-btn" data-date="yesterday">昨天</button>
-                  <button class="seg-btn" data-date="all">全部</button>
-                </div>
-                <button class="date-step-btn" id="nextDayBtn" title="后一天">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </button>
-                <div class="calendar-picker-wrapper">
-                  <button class="calendar-pill-btn" id="calendarTriggerBtn" title="按日历挑选日期">
-                    <svg class="calendar-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <span id="calendarDateText">日历</span>
-                  </button>
-                  <input type="date" id="nativeDatePicker" class="hidden-native-date">
-                </div>
+              <div id="todoListContainer" class="items-list">
+                <div class="empty-state">暂无待办事项，输入上方事项添加</div>
               </div>
             </div>
-            <div id="doneListContainer" class="items-list">
-              <div class="empty-state">今天还没有记录已完成的工作</div>
+
+            <!-- 右栏：已完成时间轴与历史日期回溯 -->
+            <div class="panel panel-done">
+              <div class="panel-header">
+                <div class="panel-header-title">
+                  <span class="panel-tag-badge done-tag">完成</span>
+                  <h3 id="donePanelTitle">今日已完成</h3>
+                </div>
+                <div class="date-navigator">
+                  <button class="date-step-btn" id="prevDayBtn" title="前一天">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <div class="segmented-control">
+                    <button class="seg-btn active" data-date="today">今天</button>
+                    <button class="seg-btn" data-date="yesterday">昨天</button>
+                    <button class="seg-btn" data-date="all">全部</button>
+                  </div>
+                  <button class="date-step-btn" id="nextDayBtn" title="后一天">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                  <div class="calendar-picker-wrapper">
+                    <button class="calendar-pill-btn" id="calendarTriggerBtn" title="按日历挑选日期">
+                      <svg class="calendar-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                      <span id="calendarDateText">日历</span>
+                    </button>
+                    <input type="date" id="nativeDatePicker" class="hidden-native-date">
+                  </div>
+                </div>
+              </div>
+              <div id="doneListContainer" class="items-list">
+                <div class="empty-state">今天还没有记录已完成的工作</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 视图二：全景日历看板模式 (Full-page Calendar View) -->
+        <div id="calendarBoardView" class="view-mode-container hidden">
+          <!-- 日历操作工具栏 -->
+          <div class="cal-toolbar">
+            <div class="cal-tool-left">
+              <button id="btnCalNewItem" class="btn btn-apifox-primary btn-cal-action">
+                <span class="btn-icon-plus">+</span>
+                <span>新建日程</span>
+              </button>
+              <button id="btnCalToday" class="btn-cal-today" title="快速返回今天">今天</button>
+              <div class="cal-nav-group">
+                <button id="btnCalPrevMonth" class="cal-nav-btn" title="上个月">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <div class="cal-current-label-wrap">
+                  <span id="calCurrentMonthLabel" class="cal-current-month-text">2026年11月</span>
+                </div>
+                <button id="btnCalNextMonth" class="cal-nav-btn" title="下个月">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="cal-tool-right">
+              <div class="cal-stats-group">
+                <span class="pill pill-todo" id="calMonthTodoCount">本月待办: 0</span>
+                <span class="pill pill-done" id="calMonthDoneCount">本月完成: 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 日历主体看板 -->
+          <div class="cal-grid-frame">
+            <!-- 7 列星期表头 (对标图片周日~周六) -->
+            <div class="cal-weekdays-row">
+              <div class="cal-th-col weekend">周日</div>
+              <div class="cal-th-col">周一</div>
+              <div class="cal-th-col">周二</div>
+              <div class="cal-th-col">周三</div>
+              <div class="cal-th-col">周四</div>
+              <div class="cal-th-col">周五</div>
+              <div class="cal-th-col weekend">周六</div>
+            </div>
+
+            <!-- 月度动态日期网格 -->
+            <div id="calendarGridBody" class="cal-cells-grid">
+              <!-- JS 动态渲染月度单元格 -->
             </div>
           </div>
         </div>
@@ -358,6 +433,51 @@
         <!-- 外观设置 Tab Pane -->
         <div class="settings-tab-pane active" id="paneAppearance">
           <h2 class="settings-pane-title">外观</h2>
+
+          <!-- 界面视图模式选项 -->
+          <div class="settings-section">
+            <h4 class="settings-section-title">界面视图模式</h4>
+            <div class="view-mode-cards-grid">
+              <!-- 1. 经典双栏工作流 -->
+              <div class="view-mode-card active" data-mode="workflow" title="经典双栏工作流模式">
+                <div class="view-mode-preview preview-mode-workflow">
+                  <div class="vprev-top-bar"></div>
+                  <div class="vprev-cols-wrap">
+                    <div class="vprev-col-block">
+                      <div class="vprev-chip todo"></div>
+                      <div class="vprev-chip todo"></div>
+                    </div>
+                    <div class="vprev-col-block">
+                      <div class="vprev-chip done"></div>
+                      <div class="vprev-chip done"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="view-mode-meta">
+                  <span class="view-mode-title">经典双栏工作流</span>
+                  <span class="view-mode-desc">快速录入 · 待办流水与历史回溯</span>
+                </div>
+              </div>
+              <!-- 2. 全景日历看板 -->
+              <div class="view-mode-card" data-mode="calendar" title="全景日历看板模式">
+                <div class="view-mode-preview preview-mode-calendar">
+                  <div class="vprev-cal-header-bar"></div>
+                  <div class="vprev-cal-cells-grid">
+                    <div class="vprev-mini-cell"><span>1</span></div>
+                    <div class="vprev-mini-cell is-cur"><span>2</span></div>
+                    <div class="vprev-mini-cell"><span>3</span></div>
+                    <div class="vprev-mini-cell"><span>4</span></div>
+                    <div class="vprev-mini-cell"><span>5</span></div>
+                    <div class="vprev-mini-cell"><span>6</span></div>
+                  </div>
+                </div>
+                <div class="view-mode-meta">
+                  <span class="view-mode-title">全景日历看板</span>
+                  <span class="view-mode-desc">月度全景 · 任务排期打卡与回溯</span>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <!-- 背景主题选项 -->
           <div class="settings-section">
@@ -499,6 +619,107 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日历新建日程事项弹窗 Modal -->
+  <div id="calendarNewItemModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-title-icon">📅</span>
+          <h3 id="calModalTitle">新建日程事项</h3>
+        </div>
+        <button id="closeCalItemModal" class="close-btn" title="关闭">&times;</button>
+      </div>
+      <div class="modal-body form-body">
+        <div class="form-group">
+          <label class="form-label" for="calItemDateInput">所属日期 <span class="required-star">*</span></label>
+          <input type="date" id="calItemDateInput" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="calItemContentInput">事项描述 <span class="required-star">*</span></label>
+          <input type="text" id="calItemContentInput" class="form-input" placeholder="输入日程安排或要做的工作... (支持 #标签)" autocomplete="off">
+          <div class="tag-shortcuts cal-tag-shortcuts">
+            <span class="shortcut-tag" data-tag="#需求开发">#需求开发</span>
+            <span class="shortcut-tag" data-tag="#Bug修复">#Bug修复</span>
+            <span class="shortcut-tag" data-tag="#方案评审">#方案评审</span>
+            <span class="shortcut-tag" data-tag="#性能优化">#性能优化</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">初始状态与归档</label>
+          <div class="cal-status-radios">
+            <label class="cal-radio-pill">
+              <input type="radio" name="calItemStatus" value="todo" checked>
+              <span>待办 (To-Do)</span>
+            </label>
+            <label class="cal-radio-pill">
+              <input type="radio" name="calItemStatus" value="done">
+              <span>直接归档已完成</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">可见性</label>
+          <div class="cal-status-radios">
+            <label class="cal-radio-pill">
+              <input type="radio" name="calItemVis" value="public" checked>
+              <span>🌐 项目公开</span>
+            </label>
+            <label class="cal-radio-pill">
+              <input type="radio" name="calItemVis" value="private">
+              <span>🔒 仅自己可见</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelCalItemBtn" class="btn btn-secondary">取消</button>
+        <button id="submitCalItemBtn" class="btn btn-apifox-primary">创建日程</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 单日全部事项查看与管理弹窗 Modal -->
+  <div id="calendarDayDetailModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-title-icon">🗓️</span>
+          <div>
+            <h3 id="dayDetailTitle">2026年11月11日 事项清单</h3>
+            <span id="dayDetailSubtitle" class="modal-subtitle">农历十月初三</span>
+          </div>
+        </div>
+        <button id="closeDayDetailModal" class="close-btn" title="关闭">&times;</button>
+      </div>
+      <div class="modal-body day-detail-body">
+        <!-- 弹窗内快速录入 -->
+        <div class="day-quick-add-bar">
+          <input type="text" id="dayQuickAddInput" class="form-input" placeholder="为此日快速添加事项... 按回车确认" autocomplete="off">
+          <button id="dayQuickAddBtn" class="btn btn-apifox-primary">+ 添加</button>
+        </div>
+        <div class="day-detail-sections-grid">
+          <div class="day-detail-section">
+            <div class="day-section-header">
+              <span class="panel-tag-badge todo-tag">待办</span>
+              <h4>待办事项 (<span id="dayDetailTodoCount">0</span>)</h4>
+            </div>
+            <div id="dayDetailTodoList" class="items-list day-items-scroll"></div>
+          </div>
+          <div class="day-detail-section">
+            <div class="day-section-header">
+              <span class="panel-tag-badge done-tag">完成</span>
+              <h4>已完成 (<span id="dayDetailDoneCount">0</span>)</h4>
+            </div>
+            <div id="dayDetailDoneList" class="items-list day-items-scroll"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="closeDayDetailBtn" class="btn btn-secondary">关闭</button>
       </div>
     </div>
   </div>
