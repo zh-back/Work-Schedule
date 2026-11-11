@@ -7,11 +7,26 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#pragma comment(lib, "ws2_32.lib")
+#else
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <pthread.h>
+typedef int SOCKET;
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+#define closesocket close
+typedef pthread_t HANDLE;
+#endif
 
-static HANDLE g_thread = NULL;
+static HANDLE g_thread = 0;
 static SOCKET g_listen_socket = INVALID_SOCKET;
 static int g_bound_port = 0;
 static volatile int g_running = 0;
@@ -118,7 +133,11 @@ static int64_t get_json_int64(const char *body, const char *key, int64_t default
     if (!p) return default_val;
     p += strlen(pattern);
     while (*p && (*p == ' ' || *p == ':')) p++;
+#ifdef _WIN32
     return _strtoi64(p, NULL, 10);
+#else
+    return strtoll(p, NULL, 10);
+#endif
 }
 
 static void send_http_response(SOCKET sock, int status_code, const char *content_type, const char *body) {
@@ -282,7 +301,11 @@ static void handle_client(SOCKET client) {
         int64_t now_ms = get_current_timestamp_ms();
         time_t sec = (time_t)(now_ms / 1000LL);
         struct tm l_tm;
+#ifdef _WIN32
         localtime_s(&l_tm, &sec);
+#else
+        localtime_r(&sec, &l_tm);
+#endif
 
         if (strcmp(date_param, "all") == 0) {
             start_ms = 0;
@@ -491,8 +514,13 @@ static void handle_client(SOCKET client) {
     closesocket(client);
 }
 
+#ifdef _WIN32
 static DWORD WINAPI server_thread_func(LPVOID lpParam) {
     (void)lpParam;
+#else
+static void* server_thread_func(void *lpParam) {
+    (void)lpParam;
+#endif
     while (g_running) {
         SOCKET client = accept(g_listen_socket, NULL, NULL);
         if (client == INVALID_SOCKET) {
@@ -501,22 +529,33 @@ static DWORD WINAPI server_thread_func(LPVOID lpParam) {
         }
         handle_client(client);
     }
+#ifdef _WIN32
     return 0;
+#else
+    return NULL;
+#endif
 }
 
 int server_start_background(int port) {
     if (g_running) return 0;
 
+#ifdef _WIN32
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
 
     g_listen_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (g_listen_socket == INVALID_SOCKET) return -1;
 
+#ifndef _WIN32
+    int opt = 1;
+    setsockopt(g_listen_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+#endif
+
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons((u_short)port);
+    addr.sin_port = htons((unsigned short)port);
 
     if (bind(g_listen_socket, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
         closesocket(g_listen_socket);
@@ -525,7 +564,11 @@ int server_start_background(int port) {
     }
 
     // Determine actual bound port
+#ifdef _WIN32
     int addrlen = sizeof(addr);
+#else
+    socklen_t addrlen = sizeof(addr);
+#endif
     getsockname(g_listen_socket, (struct sockaddr*)&addr, &addrlen);
     g_bound_port = ntohs(addr.sin_port);
 
@@ -536,6 +579,7 @@ int server_start_background(int port) {
     }
 
     g_running = 1;
+#ifdef _WIN32
     g_thread = CreateThread(NULL, 0, server_thread_func, NULL, 0, NULL);
     if (!g_thread) {
         g_running = 0;
@@ -543,6 +587,14 @@ int server_start_background(int port) {
         g_listen_socket = INVALID_SOCKET;
         return -1;
     }
+#else
+    if (pthread_create(&g_thread, NULL, server_thread_func, NULL) != 0) {
+        g_running = 0;
+        closesocket(g_listen_socket);
+        g_listen_socket = INVALID_SOCKET;
+        return -1;
+    }
+#endif
 
     return 0;
 }
@@ -554,9 +606,16 @@ void server_stop(void) {
         closesocket(g_listen_socket);
         g_listen_socket = INVALID_SOCKET;
     }
+#ifdef _WIN32
     if (g_thread) {
         WaitForSingleObject(g_thread, 1000);
         CloseHandle(g_thread);
         g_thread = NULL;
     }
+#else
+    if (g_thread) {
+        pthread_join(g_thread, NULL);
+        g_thread = 0;
+    }
+#endif
 }

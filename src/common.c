@@ -2,13 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#ifdef _WIN32
 #include <windows.h>
 #include <wincrypt.h>
+#else
+#include <sys/time.h>
+#include <unistd.h>
+#endif
 
 void generate_uuid_v4(char *out_uuid) {
     if (!out_uuid) return;
 
     unsigned char bytes[16];
+#ifdef _WIN32
     HCRYPTPROV hCryptProv = 0;
     int acquired = CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
     if (acquired) {
@@ -21,6 +28,9 @@ void generate_uuid_v4(char *out_uuid) {
             bytes[i] = (unsigned char)(rand() % 256);
         }
     }
+#else
+    arc4random_buf(bytes, 16);
+#endif
 
     // Set version to 0100 (v4)
     bytes[6] = (bytes[6] & 0x0F) | 0x40;
@@ -37,6 +47,7 @@ void generate_uuid_v4(char *out_uuid) {
 }
 
 int64_t get_current_timestamp_ms(void) {
+#ifdef _WIN32
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
     ULARGE_INTEGER uli;
@@ -49,15 +60,23 @@ int64_t get_current_timestamp_ms(void) {
     if (uli.QuadPart < EPOCH_DIFF) return 0;
     uint64_t unix_100ns = uli.QuadPart - EPOCH_DIFF;
     return (int64_t)(unix_100ns / 10000ULL);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return ((int64_t)tv.tv_sec * 1000LL) + ((int64_t)tv.tv_usec / 1000LL);
+#endif
 }
 
 void format_iso8601(int64_t ts_ms, char *out_str, size_t max_len) {
     if (!out_str || max_len < 21) return;
 
     time_t sec = (time_t)(ts_ms / 1000LL);
-    int ms = (int)(ts_ms % 1000LL);
     struct tm gm_tm;
+#ifdef _WIN32
     gmtime_s(&gm_tm, &sec);
+#else
+    gmtime_r(&sec, &gm_tm);
+#endif
 
     snprintf(out_str, max_len, "%04d-%02d-%02dT%02d:%02d:%02dZ",
              gm_tm.tm_year + 1900, gm_tm.tm_mon + 1, gm_tm.tm_mday,
